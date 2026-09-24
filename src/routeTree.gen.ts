@@ -13,9 +13,12 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as KeyPointsRouteImport } from './routes/key-points'
 import { Route as NoteKitRouteImport } from './routes/note-kit'
 import { Route as SearchRouteImport } from './routes/search'
+import { Route as SocialIndexRouteImport } from './routes/social/index'
 import { Route as MentorshipsMentorshipIndexRouteImport } from './routes/mentorships/$mentorship/index'
 import { Route as MentorshipsMentorshipSessionRouteImport } from './routes/mentorships/$mentorship/$session'
 import { Route as MentorshipsMentorshipToCheckRouteImport } from './routes/mentorships/$mentorship/to-check'
+import { Route as SocialPlatformIndexRouteImport } from './routes/social/$platform/index'
+import { Route as SocialPlatformTemplateRouteImport } from './routes/social/$platform/$template'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -37,6 +40,11 @@ const SearchRoute = SearchRouteImport.update({
   path: '/search',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SocialIndexRoute = SocialIndexRouteImport.update({
+  id: '/social/',
+  path: '/social/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MentorshipsMentorshipIndexRoute =
   MentorshipsMentorshipIndexRouteImport.update({
     id: '/mentorships/$mentorship/',
@@ -55,24 +63,40 @@ const MentorshipsMentorshipToCheckRoute =
     path: '/mentorships/$mentorship/to-check',
     getParentRoute: () => rootRouteImport,
   } as any)
+const SocialPlatformIndexRoute = SocialPlatformIndexRouteImport.update({
+  id: '/social/$platform/',
+  path: '/social/$platform/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SocialPlatformTemplateRoute = SocialPlatformTemplateRouteImport.update({
+  id: '/social/$platform/$template',
+  path: '/social/$platform/$template',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/key-points': typeof KeyPointsRoute
   '/note-kit': typeof NoteKitRoute
   '/search': typeof SearchRoute
+  '/social/': typeof SocialIndexRoute
   '/mentorships/$mentorship/$session': typeof MentorshipsMentorshipSessionRoute
   '/mentorships/$mentorship/to-check': typeof MentorshipsMentorshipToCheckRoute
+  '/social/$platform/$template': typeof SocialPlatformTemplateRoute
   '/mentorships/$mentorship/': typeof MentorshipsMentorshipIndexRoute
+  '/social/$platform/': typeof SocialPlatformIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/key-points': typeof KeyPointsRoute
   '/note-kit': typeof NoteKitRoute
   '/search': typeof SearchRoute
+  '/social': typeof SocialIndexRoute
   '/mentorships/$mentorship/$session': typeof MentorshipsMentorshipSessionRoute
   '/mentorships/$mentorship/to-check': typeof MentorshipsMentorshipToCheckRoute
+  '/social/$platform/$template': typeof SocialPlatformTemplateRoute
   '/mentorships/$mentorship': typeof MentorshipsMentorshipIndexRoute
+  '/social/$platform': typeof SocialPlatformIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -80,9 +104,12 @@ export interface FileRoutesById {
   '/key-points': typeof KeyPointsRoute
   '/note-kit': typeof NoteKitRoute
   '/search': typeof SearchRoute
+  '/social/': typeof SocialIndexRoute
   '/mentorships/$mentorship/$session': typeof MentorshipsMentorshipSessionRoute
   '/mentorships/$mentorship/to-check': typeof MentorshipsMentorshipToCheckRoute
+  '/social/$platform/$template': typeof SocialPlatformTemplateRoute
   '/mentorships/$mentorship/': typeof MentorshipsMentorshipIndexRoute
+  '/social/$platform/': typeof SocialPlatformIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -91,27 +118,36 @@ export interface FileRouteTypes {
     | '/key-points'
     | '/note-kit'
     | '/search'
+    | '/social/'
     | '/mentorships/$mentorship/$session'
     | '/mentorships/$mentorship/to-check'
+    | '/social/$platform/$template'
     | '/mentorships/$mentorship/'
+    | '/social/$platform/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/key-points'
     | '/note-kit'
     | '/search'
+    | '/social'
     | '/mentorships/$mentorship/$session'
     | '/mentorships/$mentorship/to-check'
+    | '/social/$platform/$template'
     | '/mentorships/$mentorship'
+    | '/social/$platform'
   id:
     | '__root__'
     | '/'
     | '/key-points'
     | '/note-kit'
     | '/search'
+    | '/social/'
     | '/mentorships/$mentorship/$session'
     | '/mentorships/$mentorship/to-check'
+    | '/social/$platform/$template'
     | '/mentorships/$mentorship/'
+    | '/social/$platform/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -119,9 +155,12 @@ export interface RootRouteChildren {
   KeyPointsRoute: typeof KeyPointsRoute
   NoteKitRoute: typeof NoteKitRoute
   SearchRoute: typeof SearchRoute
+  SocialIndexRoute: typeof SocialIndexRoute
   MentorshipsMentorshipSessionRoute: typeof MentorshipsMentorshipSessionRoute
   MentorshipsMentorshipToCheckRoute: typeof MentorshipsMentorshipToCheckRoute
+  SocialPlatformTemplateRoute: typeof SocialPlatformTemplateRoute
   MentorshipsMentorshipIndexRoute: typeof MentorshipsMentorshipIndexRoute
+  SocialPlatformIndexRoute: typeof SocialPlatformIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -154,6 +193,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SearchRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/social/': {
+      id: '/social/'
+      path: '/social'
+      fullPath: '/social/'
+      preLoaderRoute: typeof SocialIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/mentorships/$mentorship/': {
       id: '/mentorships/$mentorship/'
       path: '/mentorships/$mentorship'
@@ -175,6 +221,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MentorshipsMentorshipToCheckRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/social/$platform/': {
+      id: '/social/$platform/'
+      path: '/social/$platform'
+      fullPath: '/social/$platform/'
+      preLoaderRoute: typeof SocialPlatformIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/social/$platform/$template': {
+      id: '/social/$platform/$template'
+      path: '/social/$platform/$template'
+      fullPath: '/social/$platform/$template'
+      preLoaderRoute: typeof SocialPlatformTemplateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -183,9 +243,12 @@ const rootRouteChildren: RootRouteChildren = {
   KeyPointsRoute: KeyPointsRoute,
   NoteKitRoute: NoteKitRoute,
   SearchRoute: SearchRoute,
+  SocialIndexRoute: SocialIndexRoute,
   MentorshipsMentorshipSessionRoute: MentorshipsMentorshipSessionRoute,
   MentorshipsMentorshipToCheckRoute: MentorshipsMentorshipToCheckRoute,
+  SocialPlatformTemplateRoute: SocialPlatformTemplateRoute,
   MentorshipsMentorshipIndexRoute: MentorshipsMentorshipIndexRoute,
+  SocialPlatformIndexRoute: SocialPlatformIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

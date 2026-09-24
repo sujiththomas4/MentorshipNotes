@@ -25,6 +25,15 @@ Open http://localhost:8080.
 | `/search` | Full-text search (Ctrl+K): results by session → topic, with the full section on demand |
 | `/mentorships/<m>/to-check` | To be checked: open questions and topics to study (from `to-check.ts`) |
 | `/key-points` | Every key point, filterable by mentorship, searchable |
+| `/social` → `/social/<platform>` → `/social/<platform>/<template>` | Social Media post generator: fill inputs, live SVG preview, exact-size PNG download |
+
+### Social Media templates
+
+`src/social/registry.tsx` lists platforms and their templates. A template is an SVG artwork
+component (fixed pixel size, e.g. 1080 × 1350) plus an editor; `src/social/export.ts` turns the
+SVG into a PNG at the exact size (Inter font embedded). Shared Instagram pieces (colours, logo,
+date pill, sentiment badge, footer, background) are in `src/social/instagram/kit.tsx`.
+First template: `Instagram_GlobalMarket_All`, a 7-slide carousel (`src/social/instagram/global-market/`: data, cover, detail, editor).
 | `/note-kit` | Reference: every building block with example data |
 
 ## Content

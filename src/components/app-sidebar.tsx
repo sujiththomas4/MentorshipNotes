@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
-import { BookOpenText, House, ListTodo, Plus, Search, Shapes, Star, Video } from "lucide-react";
+import { BookOpenText, House, ListTodo, Megaphone, Plus, Search, Shapes, Star, Video } from "lucide-react";
+import { PLATFORMS } from "@/social/registry";
 import { AddMentorshipDialog } from "@/components/add-mentorship-dialog";
 import { MentorAvatar } from "@/components/mentor-avatar";
 import { mentorColor, mentorships, sessionWhen } from "@/content";
@@ -155,6 +156,46 @@ export function AppSidebar({ onNavigate }: { onNavigate?: () => void }) {
                 </button>
               }
             />
+          </div>
+        </div>
+
+        <div>
+          <p className={groupLabel}>Social Media</p>
+          <div className="space-y-0.5">
+            <Link
+              to="/social"
+              onClick={onNavigate}
+              className={cn(
+                "flex items-center gap-3 rounded-xl px-3 py-2 text-sm text-sidebar-foreground/75 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground",
+                pathname === "/social" && "bg-sidebar-accent font-medium text-sidebar-foreground",
+              )}
+            >
+              <Megaphone className="h-4 w-4" /> All platforms
+            </Link>
+            {PLATFORMS.filter((p) => p.available).map((p) => {
+              const Icon = p.icon;
+              const on = pathname.startsWith(`/social/${p.id}`);
+              return (
+                <Link
+                  key={p.id}
+                  to="/social/$platform"
+                  params={{ platform: p.id }}
+                  onClick={onNavigate}
+                  className={cn(
+                    "flex items-center gap-3 rounded-xl px-2.5 py-2 text-sm text-sidebar-foreground/75 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground",
+                    on && "bg-sidebar-accent font-medium text-sidebar-foreground",
+                  )}
+                >
+                  <span className="flex h-7 w-7 items-center justify-center rounded-lg text-white" style={{ background: p.gradient }}>
+                    <Icon className="h-4 w-4" />
+                  </span>
+                  <span className="flex-1">{p.name}</span>
+                  <span className="rounded-full bg-white/10 px-1.5 py-px font-mono text-[10px] text-sidebar-foreground/70">
+                    {p.templates.length}
+                  </span>
+                </Link>
+              );
+            })}
           </div>
         </div>
       </nav>
