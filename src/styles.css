@@ -1,0 +1,251 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Mentor Notes — design system.
+ * Palette: Navy Trust (deep navy + crisp white + azure accent).
+ * Type: Space Grotesk (display) + DM Sans (body).
+ */
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+
+  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-ring-offset-background: var(--background);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* trading desk tones */
+  --color-bull: var(--bull);
+  --color-bear: var(--bear);
+  --color-neutral-tone: var(--neutral-tone);
+  --color-gold: var(--gold);
+}
+
+:root {
+  --radius: 0.75rem;
+
+  /* Surfaces: airy off-white with navy ink */
+  --background: oklch(0.97 0.006 250);
+  --foreground: oklch(0.24 0.06 264);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.24 0.06 264);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.24 0.06 264);
+
+  /* Primary: deep navy. Accent: azure. */
+  --primary: oklch(0.36 0.07 252);
+  --primary-foreground: oklch(0.97 0.006 250);
+  --secondary: oklch(0.95 0.012 250);
+  --secondary-foreground: oklch(0.36 0.07 252);
+  --muted: oklch(0.95 0.012 250);
+  --muted-foreground: oklch(0.46 0.04 252);
+  --accent: oklch(0.54 0.09 244);
+  --accent-foreground: oklch(0.99 0.004 248);
+
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.984 0.003 247.858);
+  --border: oklch(0.90 0.012 250);
+  --input: oklch(0.90 0.012 250);
+  --ring: oklch(0.54 0.09 244);
+
+  --chart-1: oklch(0.54 0.09 244);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+
+  --bull: oklch(0.52 0.11 160);
+  --bear: oklch(0.54 0.17 28);
+  --neutral-tone: oklch(0.48 0.06 245);
+  --gold: oklch(0.62 0.12 75);
+
+  /* Sidebar: deep navy command surface */
+  --sidebar: oklch(0.24 0.06 264);
+  --sidebar-foreground: oklch(0.96 0.008 250);
+  --sidebar-primary: oklch(0.96 0.008 250);
+  --sidebar-primary-foreground: oklch(0.24 0.06 264);
+  --sidebar-accent: oklch(0.31 0.07 264);
+  --sidebar-accent-foreground: oklch(0.96 0.008 250);
+  --sidebar-border: oklch(0.34 0.05 264 / 55%);
+  --sidebar-ring: oklch(0.54 0.09 244);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4, h5 {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+  }
+}
+
+/* Subtle elevation used by cards on the off-white canvas */
+@utility card-elevated {
+  box-shadow:
+    0 1px 2px -1px oklch(0.24 0.06 264 / 0.08),
+    0 8px 24px -12px oklch(0.24 0.06 264 / 0.12);
+}
+
+/* Sidebar: deep navy with a soft azure glow at the top */
+@utility sidebar-surface {
+  background:
+    radial-gradient(120% 40% at 0% 0%, oklch(0.54 0.09 244 / 0.35), transparent 70%),
+    radial-gradient(80% 30% at 100% 100%, oklch(0.52 0.13 300 / 0.18), transparent 70%),
+    linear-gradient(180deg, oklch(0.25 0.065 262), oklch(0.19 0.05 266));
+}
+
+/* Hero band at the top of pages */
+@utility hero-surface {
+  background:
+    radial-gradient(60% 120% at 100% 0%, oklch(0.54 0.09 244 / 0.35), transparent 60%),
+    linear-gradient(120deg, oklch(0.27 0.07 262), oklch(0.33 0.08 252));
+}
+
+/* Focus ring on navy sidebar inputs */
+@utility sidebar-input {
+  background-color: oklch(0.31 0.07 264 / 50%);
+  border-color: oklch(0.34 0.05 264 / 60%);
+  color: var(--color-sidebar-foreground);
+}
+
+/* Plain text inside a session: paragraphs, lists, bold, inline code */
+@layer components {
+  .note-prose {
+    font-size: 1.0625rem;
+    line-height: 1.75;
+  }
+  /* only plain elements; components style their own */
+  .note-prose :is(p, ul, ol):not([class]) {
+    margin-top: 0.85em;
+  }
+  .note-prose > :is(p, ul, ol):not([class]):first-child {
+    margin-top: 0;
+  }
+  .note-prose ul:not([class]) {
+    list-style: disc;
+    padding-left: 1.4em;
+  }
+  .note-prose ol:not([class]) {
+    list-style: decimal;
+    padding-left: 1.4em;
+  }
+  .note-prose :is(ul, ol):not([class]) > li + li {
+    margin-top: 0.3em;
+  }
+  .note-prose :is(ul, ol):not([class]) > li::marker {
+    color: var(--color-accent);
+  }
+  .note-prose strong {
+    font-weight: 600;
+    color: var(--color-foreground);
+  }
+  .note-prose h3:not([class]) {
+    margin-top: 1.6em;
+    font-size: 1.2rem;
+    font-weight: 600;
+  }
+  .note-prose code:not([class]) {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+    background: var(--color-secondary);
+    border-radius: 0.3rem;
+    padding: 0.1em 0.35em;
+  }
+  .note-prose a {
+    color: var(--color-accent);
+    text-underline-offset: 3px;
+  }
+  .note-prose a:hover {
+    text-decoration: underline;
+  }
+}
+
+/* Session sections: each gets its own soft tint, cycling through six colours */
+@layer components {
+  .note-section {
+    --sec: oklch(0.54 0.09 244);
+    background: color-mix(in srgb, var(--sec) 12%, var(--color-card));
+    border: 1px solid color-mix(in srgb, var(--sec) 32%, transparent);
+    box-shadow: inset 4px 0 0 var(--sec);
+  }
+  .note-section:nth-of-type(6n + 2) {
+    --sec: oklch(0.55 0.11 160);
+  }
+  .note-section:nth-of-type(6n + 3) {
+    --sec: oklch(0.64 0.13 70);
+  }
+  .note-section:nth-of-type(6n + 4) {
+    --sec: oklch(0.52 0.13 300);
+  }
+  .note-section:nth-of-type(6n + 5) {
+    --sec: oklch(0.56 0.08 200);
+  }
+  .note-section:nth-of-type(6n + 6) {
+    --sec: oklch(0.6 0.14 20);
+  }
+  .note-section-dot {
+    background: var(--sec);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--sec) 18%, transparent);
+  }
+}
+
+/* Small uppercase label used above fields and sections */
+@utility eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-muted-foreground);
+}
