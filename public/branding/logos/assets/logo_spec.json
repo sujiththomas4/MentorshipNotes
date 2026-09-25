@@ -1,0 +1,29 @@
+{
+  "canvas": "Logo assets are independent of the Instagram canvas. For Instagram, place them inside a 1080\u00d71350 px (4:5) canvas.",
+  "locked_variants": [
+    {
+      "name": "Indian Traders Tricolor Shield",
+      "file": "assets/indian-traders-tricolor-shield.png",
+      "emblem": "assets/indian-traders-tricolor-shield-emblem.png",
+      "wordmark": "assets/indian-traders-tricolor-wordmark.png",
+      "layout": "Shield/emblem above; INDIAN and TRADERS inside the shield.",
+      "text": "INDIAN TRADERS",
+      "colors": {
+        "INDIAN": "saffron / white / green",
+        "TRADERS": "white"
+      }
+    },
+    {
+      "name": "Indian Traders Horizontal Shield",
+      "file": "assets/indian-traders-horizontal-shield.png",
+      "emblem": "assets/indian-traders-horizontal-shield-emblem.png",
+      "wordmark": "assets/indian-traders-horizontal-wordmark-tricolor.png",
+      "layout": "Shield/emblem left; wordmark right.",
+      "text": "INDIAN TRADERS",
+      "colors": {
+        "INDIAN": "saffron / white / green",
+        "TRADERS": "white"
+      }
+    }
+  ]
+}

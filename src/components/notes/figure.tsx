@@ -86,16 +86,19 @@ export function AnnotatedFigure({
   alt,
   caption,
   marks,
+  width = "full",
 }: {
   src: string;
   alt: string;
   caption?: ReactNode;
   /** x / y are percentages of the image width / height */
   marks: { x: number; y: number; text: ReactNode }[];
+  /** full = column width, md = narrower for tall or small images */
+  width?: "full" | "md";
 }) {
   const [broken, setBroken] = useState(false);
   return (
-    <figure className="my-6">
+    <figure className={cn("my-6", width === "md" && "mx-auto max-w-sm")}>
       <div className="relative overflow-hidden rounded-xl border border-border bg-card card-elevated">
         {broken ? (
           <div className="flex min-h-48 items-center justify-center p-6 text-sm text-muted-foreground">

@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "key": "default:Instagram_SwingTrade@2026-09-27",
+  "templateId": "Instagram_SwingTrade",
+  "date": "2026-09-27",
+  "time": "",
+  "savedAt": "2026-09-25T11:53:57.153Z",
+  "preview": "/social/posts/previews/default_Instagram_SwingTrade_2026-09-27-mugwkdct.webp",
+  "data": {
+    "date": "2026-09-27",
+    "stockName": "",
+    "ticker": "Rekaaa",
+    "exchange": "NSE",
+    "currentPrice": "100",
+    "direction": "BUY",
+    "entryPrice": "",
+    "target1": "",
+    "target2": "",
+    "stopLoss": "",
+    "timeframe": "Daily",
+    "setup": "Pullback",
+    "reason": [
+      ""
+    ],
+    "riskReward": "",
+    "chart": "asset:e98f7f33cb7e355c16666917e6b68ee279782521.png",
+    "chartSize": {
+      "w": 404,
+      "h": 493
+    },
+    "chartFit": "fit",
+    "chartZoom": 100,
+    "chartX": 528,
+    "chartY": -107,
+    "illustrativeTag": true,
+    "logo": "tricolor",
+    "logoBg": "shield",
+    "logoHeight": 119,
+    "titleA": "SWING",
+    "titleB": "TRADING",
+    "script": [
+      "Plan",
+      "Execute",
+      "Grow"
+    ],
+    "footer": "TRADE SMART   |   LEARN DAILY   |   GROW TOGETHER"
+  }
+}

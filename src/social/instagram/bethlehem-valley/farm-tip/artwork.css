@@ -1,0 +1,130 @@
+/* Post canvas styles ported verbatim from src/sample htmls/bethlehem-valley-post-v2.html, scoped to .bv2. */
+.bv2.canvas{--green:#0A3A20; --green-2:#0B6B48; --gold:#D8AA35; --gold-2:#E9C35A; --cream:#F5F2E4; --cream-2:#FAF8EF; --ink:#0F3A24; --white:#fff;
+  --line:#c9cfbf;}
+.bv2.canvas{position:relative;width:1080px;height:1920px;overflow:hidden;background:var(--cream);color:var(--ink);font-family:"BV DM Sans","BV Noto Sans Malayalam",Arial,sans-serif}
+.bv2.canvas.feed{height:1350px}
+.bv2 .ml{font-family:"BV Noto Sans Malayalam","BV DM Sans",sans-serif}
+.bv2 .script{font-family:"BV Caveat","BV Libre Baskerville",cursive}
+.bv2 .header{position:absolute;left:0;top:0;width:1080px;transform-origin:50% 0;z-index:2}
+.bv2 .hbg{position:absolute;inset:0;background:radial-gradient(90% 120% at 50% 0%,#0f4a2a 0%,#0A3A20 55%,#072d18 100%)}
+.bv2 .hwave{position:absolute;left:0;bottom:-2px;width:100%}
+.bv2 .leafpat{position:absolute;inset:0;opacity:.06}
+.bv2 .h-centered .hphoto{position:absolute;left:0;top:0;width:300px;height:348px;background-size:cover;background-position:left top;
+  -webkit-mask-image:linear-gradient(90deg,#000 45%,transparent 100%),linear-gradient(180deg,#000 62%,transparent 100%);-webkit-mask-composite:source-in;
+  mask-image:linear-gradient(90deg,#000 45%,transparent 100%),linear-gradient(180deg,#000 62%,transparent 100%);mask-composite:intersect}
+.bv2 .h-centered .emblem{position:absolute;left:50%;top:34px;transform:translateX(-50%);height:228px;width:auto}
+.bv2 .h-centered .emblem.badge-logo{height:250px;top:20px;filter:drop-shadow(0 10px 18px rgba(0,0,0,.35))}
+.bv2 .h-centered .bname{position:absolute;left:180px;right:180px;top:262px;text-align:center;font-family:"BV Libre Baskerville",Georgia,serif;font-weight:700;font-size:58px;line-height:1.05;letter-spacing:-.8px;color:#fff;white-space:nowrap;overflow:hidden;
+  text-shadow:0 3px 10px rgba(0,0,0,.35)}
+.bv2 .h-centered .tag{position:absolute;left:0;right:0;top:342px;display:flex;justify-content:center;align-items:center;gap:22px;color:var(--gold-2);font-size:19px;font-weight:600;letter-spacing:6px;white-space:nowrap}
+.bv2 .h-centered .tag i{width:66px;height:2px;background:var(--gold)}
+.bv2 .h-centered .slogan{position:absolute;right:52px;top:80px;width:180px;color:#fff;font-size:47px;line-height:.98;transform:rotate(-9deg);transform-origin:50% 50%;text-align:left}
+.bv2 .h-centered .slogan svg{display:block;width:130px;height:22px;margin:6px 0 0 18px}
+.bv2 .h-centered.nobrand .emblem{top:60px;height:260px}
+.bv2 .h-centered.nobrand .emblem.badge-logo{height:300px;top:40px}
+.bv2 .h-classic .brandrow{position:absolute;left:56px;right:56px;top:66px;display:flex;align-items:center;gap:26px}
+.bv2 .h-classic .logo{width:236px;height:236px;flex:none;object-fit:contain;filter:drop-shadow(0 10px 18px rgba(0,0,0,.35))}
+.bv2 .h-classic .brandtxt{flex:1;min-width:0}
+.bv2 .h-classic .bname{font-family:"BV Libre Baskerville",Georgia,serif;font-weight:700;font-size:52px;line-height:1.05;letter-spacing:-1px;color:#fff;white-space:nowrap;overflow:hidden}
+.bv2 .h-classic .tag{margin-top:16px;color:var(--gold);font-size:21px;font-weight:700;letter-spacing:6px;white-space:nowrap}
+.bv2 .h-classic .slogan{flex:none;width:230px;text-align:center;border-left:2px solid rgba(216,170,53,.45);padding-left:22px;color:#fff}
+.bv2 .h-classic .slogan .s1{font-family:"BV Libre Baskerville",Georgia,serif;font-style:italic;font-size:28px;line-height:1.25}
+.bv2 .h-classic .slogan .s2{margin-top:12px;color:var(--gold);font-size:14px;font-weight:700;letter-spacing:3.5px}
+.bv2 .h-compact .brandrow{position:absolute;left:60px;right:60px;top:34px;display:flex;align-items:center;gap:24px}
+.bv2 .h-compact .logo{width:168px;height:168px;flex:none;object-fit:contain;filter:drop-shadow(0 8px 14px rgba(0,0,0,.35))}
+.bv2 .h-compact .brandtxt{flex:1;min-width:0}
+.bv2 .h-compact .bname{font-family:"BV Libre Baskerville",Georgia,serif;font-weight:700;font-size:50px;line-height:1.05;color:#fff;white-space:nowrap;overflow:hidden}
+.bv2 .h-compact .tag{margin-top:12px;color:var(--gold);font-size:18px;font-weight:700;letter-spacing:5px;white-space:nowrap}
+.bv2 .h-compact .slogan{flex:none;color:#fff;font-size:40px;line-height:1;text-align:right;transform:rotate(-6deg)}
+.bv2 .mid{position:absolute;left:60px;right:26px;display:grid;grid-template-columns:1fr 417px;grid-template-rows:minmax(0,1fr);gap:40px;z-index:1}
+.bv2 .copy{min-height:0;overflow:hidden;--k:1;padding-top:10px}
+.bv2 .badge{display:inline-flex;align-items:center;gap:14px;background:var(--green);color:#fff;border-radius:40px;padding:13px 32px 13px 22px;font-weight:700;font-size:26px;letter-spacing:.6px;white-space:nowrap}
+.bv2 .badge svg{width:36px;height:36px;color:#fff}
+.bv2 .metatxt{margin-left:16px;font-size:20px;font-weight:600;color:#557062}
+.bv2 .copy h1{margin:32px 0 0;font-size:calc(54px*var(--k));line-height:1.1;font-weight:700;letter-spacing:-.8px;color:var(--ink)}
+.bv2 .copy .mlh{margin:14px 0 0;font-size:calc(32px*var(--k));line-height:1.38;font-weight:500;color:var(--ink)}
+.bv2 .copy .rule{height:5px;width:106px;background:var(--gold-2);border-radius:3px;margin:28px 0 30px}
+.bv2 .copy .body{margin:0;font-size:calc(25px*var(--k));line-height:1.42;color:#1d3a2a}
+.bv2 .copy .mlb{margin:26px 0 0;font-size:calc(21px*var(--k));line-height:1.62;font-weight:500;color:#1d3a2a}
+.bv2 .photo{position:relative;border-radius:46px;border:9px solid #fff;overflow:hidden;background:#cfdcc4;
+  box-shadow:0 0 0 2px #e6e1d0,0 20px 36px rgba(10,58,32,.14)}
+.bv2 .photo>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.bv2 .ph{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;color:var(--green);
+  background:radial-gradient(60% 40% at 30% 30%,rgba(255,255,255,.55),transparent 70%),radial-gradient(50% 35% at 70% 75%,rgba(120,160,100,.35),transparent 70%),linear-gradient(180deg,#d7e2cf,#c5d5bb 55%,#d2dcc6)}
+.bv2 .ph svg{width:106px;height:92px}
+.bv2 .ph span{font-size:24px;font-weight:700;letter-spacing:3.5px;text-align:center;line-height:1.45}
+.bv2 .decor{position:absolute;right:0;width:300px;height:210px;z-index:2;pointer-events:none}
+.bv2 .decor svg{width:100%;height:100%;display:block}
+.bv2 .fband{position:absolute;left:0;right:0;background:linear-gradient(180deg,var(--cream-2) 80%,rgba(250,248,239,0));z-index:1}
+.bv2 .features{position:absolute;left:50px;right:50px;display:grid;grid-template-columns:repeat(4,1fr);z-index:2}
+.bv2 .feature{text-align:center;padding:0 12px;position:relative}
+.bv2 .feature+.feature::before{content:"";position:absolute;left:0;top:22px;bottom:12px;width:1.5px;background:#9fae9f}
+.bv2 .fic{width:84px;height:84px;margin:0 auto 18px;border-radius:50%;background:var(--green);display:grid;place-items:center;color:#fff}
+.bv2 .fic svg{width:42px;height:42px}
+.bv2 .ft{font-weight:600;font-size:22px;line-height:1.15;color:var(--ink)}
+.bv2 .fm{margin-top:8px;font-size:19px;line-height:1.4;font-weight:500;color:var(--ink)}
+.bv2 .land{position:absolute;left:0;right:0;height:300px;background-size:cover;background-position:center bottom;z-index:0;
+  -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 22%);mask-image:linear-gradient(180deg,transparent 0,#000 22%)}
+.bv2 .grow{position:absolute;left:50%;width:470px;height:162px;transform:translateX(-50%) rotate(-3deg);z-index:3;color:#fff;text-align:center}
+.bv2 .grow>svg{position:absolute;inset:0;width:100%;height:100%}
+.bv2 .grow .ge{position:relative;padding-top:22px;font-size:52px;line-height:1;font-weight:600}
+.bv2 .grow .gm{position:relative;margin-top:6px;font-size:28px;font-weight:600}
+.bv2 .grow .gl{position:relative;display:block;margin:6px auto 0;width:210px;height:12px}
+.bv2 .footer{position:absolute;left:0;right:0;bottom:0;height:152px;background:var(--green);color:#fff;z-index:4}
+.bv2 .footer .wave{position:absolute;left:0;top:-30px;width:100%;height:46px}
+.bv2 .footer .in{position:absolute;left:0;right:0;top:36px;bottom:24px;display:flex;align-items:center;justify-content:center;gap:48px}
+.bv2 .follow{display:flex;align-items:center;gap:20px;font-size:24px;font-weight:500}
+.bv2 .follow svg{width:44px;height:44px;color:#fff}
+.bv2 .follow .h{font-weight:700;font-size:24px}
+.bv2 .follow .t{font-size:22px}
+.bv2 .follow .h+.t{font-size:18px;color:#cfe0d6;margin-top:2px}
+.bv2 .fsep{width:2px;height:48px;background:rgba(255,255,255,.5)}
+.bv2 .fbrand{font-family:"BV Libre Baskerville",Georgia,serif;font-weight:700;font-size:31px;display:flex;align-items:center;gap:16px;white-space:nowrap;letter-spacing:-.5px}
+.bv2 .fbrand i{width:46px;height:2px;background:var(--gold)}
+.bv2.feed .copy h1{margin-top:22px;font-size:calc(44px*var(--k))}
+.bv2.feed .copy .mlh{font-size:calc(26px*var(--k));margin-top:10px}
+.bv2.feed .copy .rule{margin:18px 0 20px}
+.bv2.feed .copy .body{font-size:calc(21px*var(--k))}
+.bv2.feed .copy .mlb{font-size:calc(18px*var(--k));margin-top:14px}
+.bv2.feed .badge{font-size:21px;padding:10px 24px 10px 16px}
+.bv2.feed .badge svg{width:28px;height:28px}
+.bv2.feed .mid{grid-template-columns:1fr 360px;gap:32px}
+.bv2.feed .photo{border-radius:38px;border-width:7px}
+.bv2.feed .fic{width:60px;height:60px;margin-bottom:10px}
+.bv2.feed .fic svg{width:30px;height:30px}
+.bv2.feed .ft{font-size:18px}
+.bv2.feed .fm{font-size:15px;margin-top:4px}
+.bv2.feed .footer{height:112px}
+.bv2.feed .footer .in{top:24px;bottom:14px}
+.bv2.feed .follow svg{width:36px;height:36px}
+.bv2.feed .follow .t{font-size:19px}
+.bv2.feed .fbrand{font-size:26px}
+.bv2.canvas{line-height:normal;-webkit-font-smoothing:antialiased;text-align:left}
+
+/* the app styles h1 globally (display font); the post uses its own */
+.bv2 h1{font-family:inherit}
+/* page number in a multi-page post (added for the carousel builder) */
+.bv2 .footer .pgno{position:absolute;right:34px;top:50%;transform:translateY(-40%);display:flex;align-items:center;gap:8px;font-size:22px;font-weight:700;letter-spacing:1px;color:var(--gold-2)}
+.bv2 .footer .pgno span{font-size:34px;line-height:1;margin-top:-4px}
+.bv2.feed .footer .pgno{font-size:19px;right:26px}
+/* footer hidden: the page number as a corner badge */
+.bv2 .pgfloat{position:absolute;right:30px;bottom:14px;z-index:5;display:flex;align-items:center;gap:8px;background:var(--green);color:var(--gold-2);border-radius:999px;
+  padding:8px 18px;font-size:22px;font-weight:700;letter-spacing:1px;box-shadow:0 6px 14px rgba(10,58,32,.25)}
+.bv2 .pgfloat span{font-size:32px;line-height:1;margin-top:-4px}
+.bv2.feed .pgfloat{right:22px;bottom:9px;font-size:18px;padding:6px 14px}
+
+/* ---------- top-right header photo (centered header), mirrors the left pepper photo ---------- */
+.bv2 .h-centered .hphoto-r{position:absolute;right:0;top:0;width:300px;height:348px;background-size:cover;background-position:right top;
+  -webkit-mask-image:linear-gradient(270deg,#000 45%,transparent 100%),linear-gradient(180deg,#000 62%,transparent 100%);-webkit-mask-composite:source-in;
+  mask-image:linear-gradient(270deg,#000 45%,transparent 100%),linear-gradient(180deg,#000 62%,transparent 100%);mask-composite:intersect}
+.bv2 .h-centered .hphoto-r~.slogan{text-shadow:0 2px 10px rgba(0,0,0,.75),0 0 3px rgba(0,0,0,.6)}
+
+/* ---------- theme: Harvest Brown (coffee brown + gold + warm cream) ---------- */
+.bv2.theme-harvest{--green:#4A2A17;--green-2:#8A5A2B;--ink:#2F1D11;--cream:#F6EEE2;--cream-2:#FBF7F0;--line:#d9ccbb;--brush:#3a2112}
+.bv2.theme-harvest .hbg{background:radial-gradient(90% 120% at 50% 0%,#6b4125 0%,#4A2A17 55%,#2c180c 100%)}
+.bv2.theme-harvest .copy .body,.bv2.theme-harvest .copy .mlb{color:#3d2a1b}
+.bv2.theme-harvest .metatxt{color:#7a6250}
+.bv2.theme-harvest .photo{background:#e3d5c0;box-shadow:0 0 0 2px #e8dccb,0 20px 36px rgba(60,32,14,.16)}
+.bv2.theme-harvest .ph{color:var(--green);background:radial-gradient(60% 40% at 30% 30%,rgba(255,255,255,.55),transparent 70%),radial-gradient(50% 35% at 70% 75%,rgba(160,120,80,.3),transparent 70%),linear-gradient(180deg,#ece2d2,#dccab0 55%,#e7dac6)}
+.bv2.theme-harvest .fm,.bv2.theme-harvest .ft{color:var(--ink)}
+.bv2.theme-harvest .feature+.feature::before{background:#bba68f}

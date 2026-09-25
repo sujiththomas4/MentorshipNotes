@@ -81,3 +81,11 @@ src/
 archive/supabase/          the earlier Supabase version (login, editable notes, trading desk, SQL);
                            not built, kept for later
 ```
+
+### Branding
+
+`/branding` (Brand kit) and `/branding/logo` show the two locked Indian Traders logo variants
+(Tricolor Shield, Horizontal Shield): parts, colours, usage rules, Instagram placement and the full
+README. Files are in `public/branding/logos/` (copied from
+"Assets with AI/Logo/indian_traders_two_locked_logo_variants_complete_assets"); data in `src/branding/indian-traders.ts`;
+the README text in `src/content/branding/logo-readme.md`.

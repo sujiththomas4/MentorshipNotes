@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "recurringFrom": "2026-09-26",
+  "slots": [
+    {
+      "id": "mugtknupp9di",
+      "templateId": "Instagram_BV_Cover",
+      "days": [],
+      "time": "",
+      "note": "",
+      "active": true
+    },
+    {
+      "id": "mugtknupglsq",
+      "templateId": "Instagram_BV_Welcome",
+      "days": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "time": "",
+      "note": "",
+      "active": true
+    },
+    {
+      "id": "default:Instagram_GlobalMarket_All",
+      "templateId": "Instagram_GlobalMarket_All",
+      "days": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "time": "",
+      "note": "",
+      "active": true
+    }
+  ],
+  "oneOffs": [],
+  "changes": [],
+  "posted": []
+}

@@ -5,7 +5,7 @@
  * are fetched once and embedded into the SVG as data URLs before rendering.
  */
 
-const FONT_CSS = "https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&display=swap";
+const FONT_CSS = "https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800;900&family=Lobster+Two:ital,wght@1,700&display=swap";
 let fontCssPromise: Promise<string> | null = null;
 
 async function toDataUrl(url: string) {
@@ -18,13 +18,19 @@ async function toDataUrl(url: string) {
   });
 }
 
+const imageCache = new Map<string, Promise<string>>();
+function imageDataUrl(url: string) {
+  if (!imageCache.has(url)) imageCache.set(url, toDataUrl(url));
+  return imageCache.get(url)!;
+}
+
 /** Inter @font-face rules with the font files inlined. Empty string if offline. */
 function embeddedFontCss() {
   fontCssPromise ??= (async () => {
     try {
       let css = await (await fetch(FONT_CSS)).text();
-      // keep only the latin subsets: that is all the artwork uses, and it keeps the SVG small
-      const blocks = css.split("@font-face").filter((b) => /U\+0000-00FF/.test(b));
+      // keep only the latin + latin-ext subsets (latin-ext has ₹): all the artwork uses, and it keeps the SVG small
+      const blocks = css.split("@font-face").filter((b) => /U\+0000-00FF|U\+0100-02BA/.test(b));
       css = blocks.map((b) => "@font-face" + b).join("\n");
       const urls = [...new Set([...css.matchAll(/url\((https:[^)]+)\)/g)].map((m) => m[1]))];
       const data = await Promise.all(urls.map(toDataUrl));
@@ -44,6 +50,16 @@ export async function svgToPngBlob(svg: SVGSVGElement, width: number, height: nu
   clone.setAttribute("height", String(height));
   clone.removeAttribute("class");
   clone.removeAttribute("style");
+
+  // an SVG drawn as an <img> cannot load external files: inline every <image> (e.g. the logo)
+  const images = Array.from(clone.querySelectorAll("image"));
+  await Promise.all(
+    images.map(async (el) => {
+      const href = el.getAttribute("href") ?? el.getAttributeNS("http://www.w3.org/1999/xlink", "href");
+      if (!href || href.startsWith("data:")) return;
+      el.setAttribute("href", await imageDataUrl(new URL(href, location.href).href));
+    }),
+  );
 
   const css = await embeddedFontCss();
   if (css) {
@@ -92,6 +108,14 @@ export async function saveAllAsPng(
   height: number,
   folder: string,
 ): Promise<"folder" | "downloads" | "cancelled"> {
+  return saveAllBlobs(
+    items.map((it) => ({ filename: it.filename, blob: () => svgToPngBlob(it.svg, width, height) })),
+    folder,
+  );
+}
+
+/** Same as saveAllAsPng for any images: each item makes its PNG blob when it is saved. */
+export async function saveAllBlobs(items: { filename: string; blob: () => Promise<Blob> }[], folder: string): Promise<"folder" | "downloads" | "cancelled"> {
   const picker = (window as unknown as { showDirectoryPicker?: (o?: object) => Promise<DirHandle> }).showDirectoryPicker;
   if (picker) {
     let root: DirHandle;
@@ -102,7 +126,7 @@ export async function saveAllAsPng(
     }
     const dir = await root.getDirectoryHandle(folder, { create: true });
     for (const it of items) {
-      const blob = await svgToPngBlob(it.svg, width, height);
+      const blob = await it.blob();
       const fh = await dir.getFileHandle(it.filename, { create: true });
       const w = await fh.createWritable();
       await w.write(blob);
@@ -111,14 +135,13 @@ export async function saveAllAsPng(
     return "folder";
   }
   for (const it of items) {
-    await downloadSvgAsPng(it.svg, width, height, `${folder}_${it.filename}`);
+    downloadBlob(await it.blob(), `${folder}_${it.filename}`);
     await new Promise((r) => setTimeout(r, 400));
   }
   return "downloads";
 }
 
-export async function downloadSvgAsPng(svg: SVGSVGElement, width: number, height: number, filename: string) {
-  const blob = await svgToPngBlob(svg, width, height);
+function downloadBlob(blob: Blob, filename: string) {
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
   a.download = filename;
@@ -126,4 +149,8 @@ export async function downloadSvgAsPng(svg: SVGSVGElement, width: number, height
   a.click();
   a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+
+export async function downloadSvgAsPng(svg: SVGSVGElement, width: number, height: number, filename: string) {
+  downloadBlob(await svgToPngBlob(svg, width, height), filename);
 }

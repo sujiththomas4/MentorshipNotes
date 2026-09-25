@@ -1,0 +1,104 @@
+/* Post canvas styles ported verbatim from src/sample htmls/bethlehem-valley-post.html, scoped to .bv1. */
+.bv1.canvas{--green:#064E36; --green-2:#0B6B48; --gold:#D8AA35; --cream:#F5F0E6; --ink:#17392B; --white:#fff;
+  --line:#cfd6cc;}
+.bv1.canvas{position:relative;width:1080px;height:1920px;overflow:hidden;background:var(--cream);color:var(--ink);font-family:"BV DM Sans","BV Noto Sans Malayalam",Arial,sans-serif}
+.bv1.canvas.feed{height:1350px}
+.bv1 .ml{font-family:"BV Noto Sans Malayalam","BV DM Sans",sans-serif}
+.bv1 .hero{position:absolute;left:0;right:0;top:0;height:470px;background:radial-gradient(120% 90% at 20% 0%,#0b6b48 0%,#064E36 55%,#053f2c 100%);color:#fff;overflow:hidden}
+.bv1 .hero .leafpat{position:absolute;inset:0;opacity:.07}
+.bv1 .hero .wave{position:absolute;left:0;bottom:-3px;width:100%;height:143px}
+.bv1 .brandrow{position:absolute;left:56px;right:56px;top:66px;display:flex;align-items:center;gap:26px}
+.bv1 .brandrow .logo{width:236px;height:236px;flex:none;filter:drop-shadow(0 10px 18px rgba(0,0,0,.35))}
+.bv1 .brandtxt{flex:1;min-width:0}
+.bv1 .bname{font-family:"BV Libre Baskerville",Georgia,serif;font-weight:700;font-size:52px;overflow:hidden;line-height:1.05;letter-spacing:-1px;white-space:nowrap}
+.bv1 .tagline{margin-top:16px;color:var(--gold);font-size:21px;font-weight:700;letter-spacing:6px;white-space:nowrap}
+.bv1 .slogan{flex:none;width:236px;text-align:center;border-left:2px solid rgba(216,170,53,.45);padding-left:24px}
+.bv1 .slogan .s1{font-family:"BV Libre Baskerville",Georgia,serif;font-style:italic;font-size:29px;line-height:1.25}
+.bv1 .slogan .s2{margin-top:12px;color:var(--gold);font-size:15px;font-weight:700;letter-spacing:3.5px}
+.bv1 .mid{position:absolute;left:62px;right:62px;top:500px;bottom:560px;display:flex;flex-direction:column}
+.bv1 .topline{display:flex;justify-content:space-between;align-items:center}
+.bv1 .badge{display:inline-flex;align-items:center;gap:14px;background:var(--green);color:#fff;border-radius:40px;padding:14px 28px 14px 20px;font-weight:700;font-size:25px;letter-spacing:1px;
+  box-shadow:0 6px 0 rgba(6,78,54,.12)}
+.bv1 .badge svg{width:34px;height:34px;color:var(--gold)}
+.bv1 .metatxt{font-size:22px;font-weight:600;color:#557062;letter-spacing:.5px}
+.bv1 .grid{flex:1;display:grid;grid-template-columns:1fr 400px;grid-template-rows:minmax(0,1fr);gap:40px;margin-top:34px;min-height:0}
+.bv1 .copy{min-height:0;overflow:hidden;--k:1}
+.bv1 .copy h1{margin:0;font-size:calc(56px*var(--k));line-height:1.06;font-weight:700;letter-spacing:-1.2px;color:var(--ink)}
+.bv1 .copy .mlh{margin:16px 0 0;font-size:calc(31px*var(--k));line-height:1.35;font-weight:700;color:var(--green)}
+.bv1 .rule{display:flex;align-items:center;gap:10px;margin:24px 0 24px}
+.bv1 .rule i{height:6px;width:96px;background:var(--gold);border-radius:3px}
+.bv1 .rule b{width:10px;height:10px;border-radius:50%;background:var(--gold)}
+.bv1 .copy .body{margin:0;font-size:calc(24px*var(--k));line-height:1.45;color:#23463a}
+.bv1 .copy .mlb{margin:18px 0 0;font-size:calc(21px*var(--k));line-height:1.6;color:#2e5346}
+.bv1 .photo{position:relative;height:100%;max-height:660px;border-radius:52px;border:9px solid #fff;overflow:hidden;background:#dfe7d7;
+  box-shadow:0 22px 40px rgba(6,60,40,.18),0 0 0 1px #d9d5c8}
+.bv1 .photo img,.bv1 .photo svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.bv1 .photo img{object-fit:cover}
+.bv1 .features{position:absolute;left:62px;right:62px;bottom:372px;display:grid;grid-template-columns:repeat(4,1fr);border-top:1.5px solid var(--line);padding-top:30px}
+.bv1 .feature{text-align:center;padding:0 14px;border-left:1.5px solid var(--line)}
+.bv1 .feature:first-child{border-left:0}
+.bv1 .fic{width:70px;height:70px;margin:0 auto 14px;border-radius:50%;background:var(--green);display:grid;place-items:center;color:#fff;box-shadow:0 0 0 5px rgba(216,170,53,.25)}
+.bv1 .fic svg{width:36px;height:36px}
+.bv1 .ft{font-weight:700;font-size:21px;line-height:1.15}
+.bv1 .fm{margin-top:7px;font-size:17px;line-height:1.35;color:#3a5a4d}
+.bv1 .grow{position:absolute;left:50%;bottom:238px;transform:translateX(-50%);display:flex;align-items:center;gap:22px;background:var(--green);color:#fff;border-radius:999px;padding:16px 46px;white-space:nowrap;
+  box-shadow:0 10px 0 rgba(6,78,54,.12)}
+.bv1 .grow svg{width:38px;height:38px;color:var(--gold);flex:none}
+.bv1 .grow svg.r{transform:scaleX(-1)}
+.bv1 .grow .ge{font-family:"BV Libre Baskerville",Georgia,serif;font-style:italic;font-size:36px;line-height:1.1;text-align:center}
+.bv1 .grow .gm{font-size:21px;text-align:center;color:#e9efe9;margin-top:4px}
+.bv1 .footer{position:absolute;left:0;right:0;bottom:0;height:200px;background:var(--green);color:#fff}
+.bv1 .footer .wave{position:absolute;left:0;top:-1px;width:100%;height:80px}
+.bv1 .footer .in{position:absolute;left:62px;right:62px;bottom:46px;display:flex;justify-content:space-between;align-items:center}
+.bv1 .follow{display:flex;align-items:center;gap:16px}
+.bv1 .follow svg{width:48px;height:48px;color:var(--gold)}
+.bv1 .follow .h{font-size:25px;font-weight:700}
+.bv1 .follow .t{font-size:18px;color:#cfe0d6;margin-top:2px}
+.bv1 .fbrand{font-family:"BV Libre Baskerville",Georgia,serif;font-weight:700;font-size:27px;display:flex;align-items:center;gap:14px;white-space:nowrap}
+.bv1 .fbrand i{width:34px;height:2px;background:var(--gold)}
+.bv1.feed .hero{height:318px}
+.bv1.feed .brandrow{top:34px;gap:20px}
+.bv1.feed .brandrow .logo{width:170px;height:170px}
+.bv1.feed .bname{font-size:46px}
+.bv1.feed .tagline{font-size:17px;letter-spacing:5px;margin-top:12px}
+.bv1.feed .slogan{width:220px}
+.bv1.feed .slogan .s1{font-size:24px}
+.bv1.feed .slogan .s2{font-size:13px;letter-spacing:3px}
+.bv1.feed .hero .wave{height:100px}
+.bv1.feed .mid{top:318px;bottom:300px}
+.bv1.feed .badge{font-size:20px;padding:10px 22px 10px 16px}
+.bv1.feed .badge svg{width:28px;height:28px}
+.bv1.feed .metatxt{font-size:18px}
+.bv1.feed .grid{grid-template-columns:1fr 330px;gap:32px;margin-top:22px}
+.bv1.feed .copy h1{font-size:calc(44px*var(--k))}
+.bv1.feed .copy .mlh{font-size:calc(25px*var(--k));margin-top:10px}
+.bv1.feed .rule{margin:16px 0}
+.bv1.feed .copy .body{font-size:calc(20px*var(--k))}
+.bv1.feed .copy .mlb{font-size:calc(17.5px*var(--k));margin-top:12px}
+.bv1.feed .photo{border-radius:40px;border-width:7px}
+.bv1.feed .features{bottom:140px;padding-top:18px;border-top:1.5px solid var(--line)}
+.bv1.feed .fic{width:52px;height:52px;margin-bottom:8px}
+.bv1.feed .fic svg{width:28px;height:28px}
+.bv1.feed .ft{font-size:17px}
+.bv1.feed .fm{font-size:14px;margin-top:4px}
+.bv1.feed .grow{display:none}
+.bv1.feed .footer{height:110px}
+.bv1.feed .footer .wave{height:50px}
+.bv1.feed .footer .in{bottom:22px}
+.bv1.feed .follow svg{width:38px;height:38px}
+.bv1.feed .follow .h{font-size:21px}
+.bv1.feed .follow .t{font-size:15px}
+.bv1.feed .fbrand{font-size:23px}
+.bv1.canvas{line-height:normal;-webkit-font-smoothing:antialiased;text-align:left}
+
+/* the app styles h1 globally (display font); the post uses its own */
+.bv1 h1{font-family:inherit}
+
+/* ---------- theme: Harvest Brown (coffee brown + gold) ---------- */
+.bv1.theme-harvest{--green:#4A2A17;--green-2:#8A5A2B;--ink:#2F1D11;--line:#ddd0bf}
+.bv1.theme-harvest .hero{background:radial-gradient(120% 90% at 20% 0%,#7a4a28 0%,#4A2A17 55%,#2c180c 100%)}
+.bv1.theme-harvest .copy .body{color:#3d2a1b}
+.bv1.theme-harvest .copy .mlb,.bv1.theme-harvest .fm{color:#4a3322}
+.bv1.theme-harvest .metatxt{color:#7a6250}
+.bv1.theme-harvest .photo{background:#e3d5c0}
+.bv1.theme-harvest .follow .t{color:#e3d3c0}

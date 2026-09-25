@@ -1,44 +1,90 @@
 import { forwardRef } from "react";
-import { IG, IG_H, IG_W, IgBackground, IgFooter, IgHeader, IgSentimentBadge, SENTIMENT, fitFont, fitLines, formatIgDate } from "@/social/instagram/kit";
+import { IG, IG_H, IG_W, IgBackground, IgFooter, IgHeader, IgSentimentCard, fitFont, fitLines, formatIgDate } from "@/social/instagram/kit";
 import { MARKET_ORDER, TOTAL_SLIDES, type GlobalMarketData, type MarketItem, type MarketKey } from "./data";
 import { MarketIcon } from "./icons";
 
-const CARD_W = 465;
-const CARD_H = 222;
-const GAP = 30;
-const GRID_TOP = 452;
+/* Cover, laid out like the reference: title block, then six tiles in 3 columns × 2 rows. */
 
-function MarketCard({ k, item, x, y }: { k: MarketKey; item: MarketItem; x: number; y: number }) {
-  const s = SENTIMENT[item.sentiment];
-  const { lines, size } = fitLines(item.name.trim() || "—", CARD_W - 164, 34, 26);
-  const detail = [item.value.trim(), item.change.trim()].filter(Boolean).join("   ");
-  const nameTop = detail ? y + 66 : y + 80;
+const COLS = 3;
+const GAP = 24;
+const TILE_W = (IG_W - 120 - GAP * (COLS - 1)) / COLS; // 304
+const TILE_H = 330;
+const GRID_TOP = 490;
+
+function Tile({ k, item, x, y, glass, opacity }: { k: MarketKey; item: MarketItem; x: number; y: number; glass: boolean; opacity: number }) {
+  const cx = x + TILE_W / 2;
+  const { lines, size } = fitLines(item.name.trim() || "—", TILE_W - 36, 34, 26, 22);
+  // the OI tile shows the buildup side (e.g. "PE Buildup"); others show value + change
+  const detail =
+    k === "oiBuildup" ? (item.buildup ? `${item.buildup} Buildup` : "") : [item.value.trim(), item.change.trim()].filter(Boolean).join("  ");
+  const nameMid = y + 172;
+  const pillW = TILE_W - 64;
+  const pillY = y + TILE_H - 88;
   return (
     <g>
-      <rect x={x} y={y} width={CARD_W} height={CARD_H} rx={24} fill={IG.card} stroke={IG.border} strokeOpacity={0.7} strokeWidth={2} />
-      <rect x={x} y={y + 24} width={5} height={CARD_H - 48} rx={2.5} fill={s.color} />
-      <MarketIcon k={k} x={x + 30} y={y + 28} size={88} uid={`cv-${k}`} />
+      <rect x={x} y={y} width={TILE_W} height={TILE_H} rx={22} fill={IG.card} fillOpacity={glass ? opacity : 0.88} stroke={glass ? "#6f93ad" : IG.border} strokeOpacity={glass ? 0.8 : 1} strokeWidth={2} />
+      <MarketIcon k={k} x={cx - 48} y={y + 30} size={96} uid={`cv-${k}`} />
       {lines.map((line, i) => (
         <text
           key={i}
-          x={x + 140}
-          y={nameTop + (i - (lines.length - 1) / 2) * size * 1.1}
+          x={cx}
+          y={nameMid + (i - (lines.length - 1) / 2) * size * 1.08}
+          textAnchor="middle"
           dominantBaseline="central"
           fill={IG.text}
           fontFamily={IG.font}
           fontSize={size}
           fontWeight={800}
-          letterSpacing={0.5}
         >
           {line}
         </text>
       ))}
       {detail && (
-        <text x={x + 140} y={y + 104} dominantBaseline="central" fill={IG.muted} fontFamily={IG.font} fontSize={23} fontWeight={600}>
+        <text x={cx} y={y + 216} textAnchor="middle" dominantBaseline="central" fill={IG.muted} fontFamily={IG.font} fontSize={fitFont(detail, TILE_W - 30, 21, 15)} fontWeight={600}>
           {detail}
         </text>
       )}
-      <IgSentimentBadge x={x + 30} y={y + CARD_H - 76} w={CARD_W - 60} h={52} sentiment={item.sentiment} />
+      <IgSentimentCard x={cx - pillW / 2} y={pillY} w={pillW} h={62} sentiment={item.sentiment} />
+    </g>
+  );
+}
+
+export const COVER_PHOTO = "/social/instagram/global-market/cover-bg.jpg";
+
+/**
+ * Landscape photo (1448 × 1086) scaled to fill the portrait canvas and centred, with a navy
+ * overlay that is darkest behind the title so text stays readable. `dim` is 0–90 (%).
+ */
+export function PhotoBackground({ dim, uid = "cv", detail = false }: { dim: number; uid?: string; detail?: boolean }) {
+  const k = Math.min(90, Math.max(0, dim)) / 100;
+  const c = (v: number) => Math.min(0.95, v);
+  // cover: darkest behind the title, lightest at the globe; detail slides keep the lower
+  // part darker too, because the description text sits there
+  const stops: [number, number][] = detail
+    ? [
+        [0, c(k + 0.3)],
+        [0.35, c(k + 0.1)],
+        [0.7, c(k + 0.25)],
+        [1, c(k + 0.2)],
+      ]
+    : [
+        [0, c(k + 0.3)],
+        [0.36, c(k + 0.15)],
+        [0.62, k],
+        [1, k * 0.45],
+      ];
+  return (
+    <g>
+      <defs>
+        <linearGradient id={`${uid}-dim`} x1="0" y1="0" x2="0" y2="1">
+          {stops.map(([o, a]) => (
+            <stop key={o} offset={o} stopColor={IG.bg} stopOpacity={a} />
+          ))}
+        </linearGradient>
+      </defs>
+      <rect width={IG_W} height={IG_H} fill={IG.bg} />
+      <image href={COVER_PHOTO} x={0} y={0} width={IG_W} height={IG_H} preserveAspectRatio="xMidYMid slice" />
+      <rect width={IG_W} height={IG_H} fill={`url(#${uid}-dim)`} />
     </g>
   );
 }
@@ -48,8 +94,8 @@ export const CoverSlide = forwardRef<SVGSVGElement, { data: GlobalMarketData; cl
   { data, className },
   ref,
 ) {
-  const titleSize = fitFont(data.titleTop, 940, 62, 36);
-  const accentSize = fitFont(data.titleAccent, 940, 84, 40);
+  const titleSize = fitFont(data.titleTop, 940, 76, 40);
+  const accentSize = fitFont(data.titleAccent, 960, 104, 44);
   return (
     <svg
       ref={ref}
@@ -63,25 +109,26 @@ export const CoverSlide = forwardRef<SVGSVGElement, { data: GlobalMarketData; cl
     >
       <defs>
         <linearGradient id="cv-accent" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0" stopColor="#5CF29A" />
-          <stop offset="1" stopColor="#1FC7A4" />
+          <stop offset="0" stopColor="#3fe46a" />
+          <stop offset="0.6" stopColor="#20e8a0" />
+          <stop offset="1" stopColor="#35c8f0" />
         </linearGradient>
       </defs>
-      <IgBackground id="cv" />
-      <IgHeader date={data.date} />
+      {data.coverPhoto ? <PhotoBackground dim={data.coverDim} /> : <IgBackground id="cv" />}
+      <IgHeader date={data.date} logo={data.logo} />
 
-      <text x={IG_W / 2} y={262} textAnchor="middle" fill={IG.text} fontFamily={IG.font} fontSize={titleSize} fontWeight={800} letterSpacing={1}>
+      <text x={IG_W / 2} y={292} textAnchor="middle" fill={IG.text} fontFamily={IG.font} fontSize={titleSize} fontWeight={800} letterSpacing={1}>
         {data.titleTop}
       </text>
-      <text x={IG_W / 2} y={352} textAnchor="middle" fill="url(#cv-accent)" fontFamily={IG.font} fontSize={accentSize} fontWeight={800} letterSpacing={2}>
+      <text x={IG_W / 2} y={396} textAnchor="middle" fill="url(#cv-accent)" fontFamily={IG.font} fontSize={accentSize} fontWeight={800} letterSpacing={1}>
         {data.titleAccent}
       </text>
-      <text x={IG_W / 2} y={404} textAnchor="middle" fill={IG.muted} fontFamily={IG.font} fontSize={fitFont(data.subtitle, 960, 25, 16)} fontWeight={600}>
+      <text x={IG_W / 2} y={452} textAnchor="middle" fill="#d7e0e7" fontFamily={IG.font} fontSize={fitFont(data.subtitle, 960, 28, 16)} fontWeight={500} xmlSpace="preserve">
         {data.subtitle}
       </text>
 
       {MARKET_ORDER.map((k, i) => (
-        <MarketCard key={k} k={k} item={data.markets[k]} x={60 + (i % 2) * (CARD_W + GAP)} y={GRID_TOP + Math.floor(i / 2) * (CARD_H + GAP)} />
+        <Tile key={k} k={k} glass={data.coverPhoto} opacity={data.cardOpacity / 100} item={data.markets[k]} x={60 + (i % COLS) * (TILE_W + GAP)} y={GRID_TOP + Math.floor(i / COLS) * (TILE_H + GAP)} />
       ))}
 
       <IgFooter left={data.footer} page={`1/${TOTAL_SLIDES}`} />

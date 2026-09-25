@@ -8,18 +8,26 @@ import type { ReactNode } from "react";
 export const IG_W = 1080;
 export const IG_H = 1350;
 
+/** Palette from the Global Market Sentiments spec (TEMPLATE_INSTRUCTIONS.md §6). */
 export const IG = {
-  bg: "#071422",
-  card: "#0D2234",
-  card2: "#112B40",
-  text: "#F5F8FA",
-  muted: "#9DB1C1",
-  border: "#426378",
-  bull: "#2ADA74",
-  bear: "#FF4952",
-  neutral: "#7E8F9D",
+  bg: "#031321",
+  card: "#061b2b",
+  card2: "#0a2438",
+  text: "#f5f7fa",
+  muted: "#b9c7d3",
+  border: "#54728b",
+  bull: "#20e878",
+  bear: "#ff3d48",
+  neutral: "#8292a2",
   font: "Inter, 'Manrope', 'DM Sans', system-ui, -apple-system, 'Segoe UI', Arial, sans-serif",
 } as const;
+
+/** Locked logos from Branding (public/branding/logos). Never redrawn: placed as the PNG. */
+export const IG_LOGOS = {
+  horizontal: { href: "/branding/logos/assets/indian-traders-horizontal-shield.png", filledHref: "/branding/logos/assets/shield-filled/indian-traders-horizontal-shield-filled.png", w: 1124, h: 492, label: "Horizontal Shield" },
+  tricolor: { href: "/branding/logos/assets/indian-traders-tricolor-shield.png", filledHref: "/branding/logos/assets/shield-filled/indian-traders-tricolor-shield-filled.png", w: 911, h: 1059, label: "Tricolor Shield" },
+} as const;
+export type IgLogoVariant = keyof typeof IG_LOGOS;
 
 export type Sentiment = "BULLISH" | "BEARISH" | "NEUTRAL";
 
@@ -29,12 +37,12 @@ export const SENTIMENT: Record<Sentiment, { color: string; mark: string }> = {
   NEUTRAL: { color: IG.neutral, mark: "—" },
 };
 
-/** "2026-09-24" → "24 SEP 2026" (empty stays empty). */
+/** "2025-04-25" → "Apr 25, 2025", as on the reference slides (empty stays empty). */
 export function formatIgDate(iso: string) {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
-  if (!m) return iso.toUpperCase();
-  const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
-  return `${Number(m[3])} ${months[Number(m[2]) - 1]} ${m[1]}`;
+  if (!m) return iso;
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  return `${months[Number(m[2]) - 1]} ${Number(m[3])}, ${m[1]}`;
 }
 
 /** Rough text width for Inter bold, used to shrink long labels instead of stretching them. */
@@ -89,34 +97,98 @@ export function wrapText(text: string, maxChars: number, maxLines: number) {
 }
 
 /** Header shared by every slide: logo left, date pill right. */
-export function IgHeader({ date }: { date: string }) {
+export function IgHeader({ date, logo = "horizontal" }: { date: string; logo?: IgLogoVariant }) {
   return (
     <g>
-      <IgLogo x={62} y={66} />
+      <IgLogo variant={logo} />
       <IgDatePill right={IG_W - 60} y={62} text={formatIgDate(date)} />
     </g>
   );
 }
 
-/** Solid sentiment pill with a round arrow icon, right-aligned at `right`. */
-export function IgSolidBadge({ right, y, sentiment }: { right: number; y: number; sentiment: Sentiment }) {
-  const s = SENTIMENT[sentiment];
-  const h = 84;
-  const w = 300;
+/** Card gradients (from the Swing Trade "TRADE DIRECTION" card), top-left → bottom-right. */
+export const SENTIMENT_CARD: Record<Sentiment, [string, string, string]> = {
+  BULLISH: ["#16b978", "#079457", "#0aa66a"],
+  BEARISH: ["#f24a55", "#d31f2c", "#ef3340"],
+  NEUTRAL: ["#8e9aa6", "#5f6f7e", "#7e8f9d"],
+};
+
+/** Arrow (or dash for NEUTRAL) in a translucent white circle. */
+function SentimentMark({ cx, cy, r, sentiment }: { cx: number; cy: number; r: number; sentiment: Sentiment }) {
+  const a = r * 0.55;
+  const sw = Math.max(3, r * 0.2);
+  return (
+    <g>
+      <circle cx={cx} cy={cy} r={r} fill="#FFFFFF" fillOpacity={0.18} />
+      <g stroke="#FFFFFF" strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round" fill="none">
+        {sentiment === "BULLISH" && <path d={`M${cx} ${cy + a} V${cy - a} M${cx - a * 0.8} ${cy - a * 0.15} L${cx} ${cy - a} L${cx + a * 0.8} ${cy - a * 0.15}`} />}
+        {sentiment === "BEARISH" && <path d={`M${cx} ${cy - a} V${cy + a} M${cx - a * 0.8} ${cy + a * 0.15} L${cx} ${cy + a} L${cx + a * 0.8} ${cy + a * 0.15}`} />}
+        {sentiment === "NEUTRAL" && <path d={`M${cx - a * 0.8} ${cy} H${cx + a * 0.8}`} />}
+      </g>
+    </g>
+  );
+}
+
+function CardDefs({ sentiment }: { sentiment: Sentiment }) {
+  const [a, b, glow] = SENTIMENT_CARD[sentiment];
+  return (
+    <defs>
+      <linearGradient id={`ig-card-${sentiment}`} x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stopColor={a} />
+        <stop offset="1" stopColor={b} />
+      </linearGradient>
+      <filter id={`ig-card-shadow-${sentiment}`} x="-15%" y="-20%" width="130%" height="160%">
+        <feDropShadow dx="0" dy="8" stdDeviation="10" floodColor={glow} floodOpacity="0.35" />
+      </filter>
+    </defs>
+  );
+}
+
+/**
+ * Sentiment card in the Swing Trade direction-card style: gradient, arrow in a circle,
+ * small label and the big word. Right-aligned at `right`.
+ */
+export function IgSolidBadge({ right, y, sentiment, label = "SENTIMENT" }: { right: number; y: number; sentiment: Sentiment; label?: string }) {
+  const h = 110;
+  const w = 320;
   const x = right - w;
-  const dark = sentiment === "NEUTRAL";
-  const cx = x + 44;
   const cy = y + h / 2;
   return (
     <g>
-      <rect x={x} y={y} width={w} height={h} rx={h / 2} fill={s.color} />
-      <circle cx={cx} cy={cy} r={24} fill="#FFFFFF" fillOpacity={dark ? 0.35 : 0.25} />
-      <g stroke="#FFFFFF" strokeWidth={5} strokeLinecap="round" strokeLinejoin="round" fill="none">
-        {sentiment === "BULLISH" && <path d={`M${cx} ${cy + 12} V${cy - 12} M${cx - 10} ${cy - 2} L${cx} ${cy - 12} L${cx + 10} ${cy - 2}`} />}
-        {sentiment === "BEARISH" && <path d={`M${cx} ${cy - 12} V${cy + 12} M${cx - 10} ${cy + 2} L${cx} ${cy + 12} L${cx + 10} ${cy + 2}`} />}
-        {sentiment === "NEUTRAL" && <path d={`M${cx - 12} ${cy} H${cx + 12}`} />}
-      </g>
-      <text x={x + 84 + (w - 84) / 2 - 8} y={cy + 1} textAnchor="middle" dominantBaseline="central" fill="#FFFFFF" fontFamily={IG.font} fontSize={30} fontWeight={800} letterSpacing={1.5}>
+      <CardDefs sentiment={sentiment} />
+      <rect x={x} y={y} width={w} height={h} rx={16} fill={`url(#ig-card-${sentiment})`} filter={`url(#ig-card-shadow-${sentiment})`} />
+      <SentimentMark cx={x + 58} cy={cy} r={34} sentiment={sentiment} />
+      <text x={x + 110} y={cy - 22} dominantBaseline="central" fill="#FFFFFF" fillOpacity={0.95} fontFamily={IG.font} fontSize={16} fontWeight={600} letterSpacing={0.5}>
+        {label}
+      </text>
+      <text x={x + 108} y={cy + 16} dominantBaseline="central" fill="#FFFFFF" fontFamily={IG.font} fontSize={fitFont(sentiment, w - 128, 42, 28)} fontWeight={900}>
+        {sentiment}
+      </text>
+    </g>
+  );
+}
+
+/** Compact version for the cover tiles: gradient bar, arrow circle on the left, the word. */
+export function IgSentimentCard({ x, y, w, h, sentiment }: { x: number; y: number; w: number; h: number; sentiment: Sentiment }) {
+  const cy = y + h / 2;
+  const r = h * 0.34;
+  const markX = x + 12 + r;
+  return (
+    <g>
+      <CardDefs sentiment={sentiment} />
+      <rect x={x} y={y} width={w} height={h} rx={14} fill={`url(#ig-card-${sentiment})`} filter={`url(#ig-card-shadow-${sentiment})`} />
+      <SentimentMark cx={markX} cy={cy} r={r} sentiment={sentiment} />
+      <text
+        x={(markX + r + x + w) / 2}
+        y={cy + 1}
+        textAnchor="middle"
+        dominantBaseline="central"
+        fill="#FFFFFF"
+        fontFamily={IG.font}
+        fontSize={fitFont(sentiment, w - (markX + r - x) - 18, 25, 16)}
+        fontWeight={900}
+        letterSpacing={0.5}
+      >
         {sentiment}
       </text>
     </g>
@@ -185,30 +257,19 @@ export function IgBackground({ id }: { id: string }) {
   );
 }
 
-/** Indian Traders mark: rising bars with a green arrow, then the wordmark. */
-export function IgLogo({ x, y }: { x: number; y: number }) {
-  return (
-    <g transform={`translate(${x} ${y})`}>
-      <rect x={0} y={40} width={12} height={24} rx={2} fill={IG.text} />
-      <rect x={18} y={28} width={12} height={36} rx={2} fill={IG.text} />
-      <rect x={36} y={16} width={12} height={48} rx={2} fill={IG.text} />
-      <rect x={54} y={4} width={12} height={60} rx={2} fill={IG.text} />
-      <path d="M-2 32 L24 12 L38 22 L64 -4" fill="none" stroke={IG.bull} strokeWidth={6} strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M52 -8 L68 -8 L68 8" fill="none" stroke={IG.bull} strokeWidth={6} strokeLinecap="round" strokeLinejoin="round" />
-      <text x={86} y={28} fill={IG.text} fontFamily={IG.font} fontSize={30} fontWeight={800} letterSpacing={1.5}>
-        INDIAN
-      </text>
-      <text x={86} y={62} fill={IG.text} fontFamily={IG.font} fontSize={30} fontWeight={800} letterSpacing={1.5}>
-        TRADERS
-      </text>
-    </g>
-  );
+/**
+ * The locked Indian Traders logo, placed as its PNG (never redrawn or recoloured).
+ * Spec: top-left, left ≈55, top ≈43, height ≈92 px; width follows the PNG's own ratio.
+ */
+export function IgLogo({ variant = "horizontal", x = 55, y = 43, height = 92 }: { variant?: IgLogoVariant; x?: number; y?: number; height?: number }) {
+  const l = IG_LOGOS[variant];
+  return <image href={l.href} x={x} y={y} height={height} width={(l.w / l.h) * height} preserveAspectRatio="xMidYMid meet" />;
 }
 
 /** Rounded date pill with a calendar icon, right-aligned at `right`. */
 export function IgDatePill({ right, y, text }: { right: number; y: number; text: string }) {
   const label = text || "—";
-  const w = Math.max(150, label.length * 13.5 + 86);
+  const w = Math.max(150, label.length * 12.5 + 90);
   const x = right - w;
   return (
     <g>
@@ -219,7 +280,7 @@ export function IgDatePill({ right, y, text }: { right: number; y: number; text:
         <line x1={7} x2={7} y1={0} y2={6} />
         <line x1={19} x2={19} y1={0} y2={6} />
       </g>
-      <text x={x + 62} y={y + 40} fill={IG.text} fontFamily={IG.font} fontSize={22} fontWeight={800} letterSpacing={1}>
+      <text x={x + 62} y={y + 40} fill={IG.text} fontFamily={IG.font} fontSize={23} fontWeight={700}>
         {label}
       </text>
     </g>

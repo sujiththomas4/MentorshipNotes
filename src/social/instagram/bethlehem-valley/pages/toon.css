@@ -1,0 +1,134 @@
+/*
+ * Caricature pages (.pg-toon). Own light frame; the brand header / footer are not drawn.
+ * --tg green, --tgd dark green, --tgl light tint, --tink title black (theme overrides below).
+ * --ts title size, --tx text size, --cs character size (user settings); --k auto-fit.
+ */
+.bv2.pg-toon{--k:1;--tg:#2E7D32;--tgd:#1B5E20;--tgl:#EEF6E8;--tgl2:#DCEDD0;--tink:#161616;--ts:1;--tx:1;--cs:1;
+  background:radial-gradient(60% 40% at 100% 0%,#eef6e6 0%,rgba(238,246,230,0) 70%),radial-gradient(55% 35% at 0% 100%,#eaf4e0 0%,rgba(234,244,224,0) 70%),#fff}
+.bv2.pg-toon.theme-harvest{--tg:#8A5A2B;--tgd:#4A2A17;--tgl:#F7EFE4;--tgl2:#EADBC6;--tink:#1f140c;
+  background:radial-gradient(60% 40% at 100% 0%,#f6ecdf 0%,rgba(246,236,223,0) 70%),radial-gradient(55% 35% at 0% 100%,#f3e8da 0%,rgba(243,232,218,0) 70%),#fffdf9}
+.bv2.pg-toon .disp{font-family:"BV Baloo Chettan 2","BV Noto Sans Malayalam","BV DM Sans",sans-serif;font-weight:800;letter-spacing:-.01em}
+
+/* ---------- frame ---------- */
+.bv2 .t-logo{position:absolute;left:30px;top:30px;width:150px;height:150px;border-radius:50%;padding:7px;z-index:6;
+  background:conic-gradient(from 200deg,#f4c542,#7cc242,#2E7D32,#3b8fd6,#f4c542)}
+.bv2 .t-logo>span{display:block;width:100%;height:100%;border-radius:50%;overflow:hidden;background:#fff;border:4px solid #fff}
+.bv2 .t-logo img{width:100%;height:100%;object-fit:cover;display:block}
+.bv2 .t-count{position:absolute;right:40px;top:40px;z-index:6;background:var(--tg);color:#fff;border-radius:22px;padding:8px 26px;font-family:"BV DM Sans",sans-serif;font-weight:700;font-size:30px;letter-spacing:.5px}
+.bv2 .t-leaf{position:absolute;z-index:1;pointer-events:none}
+.bv2 .t-leaf.tr{right:-10px;top:-10px;width:300px;height:230px;transform:scaleX(-1) rotate(180deg)}
+.bv2 .t-leaf.bl{left:-20px;bottom:-6px;width:220px;height:170px}
+.bv2 .t-foot{position:absolute;left:60px;right:60px;bottom:26px;height:56px;z-index:5;display:flex;align-items:center;gap:22px;color:var(--tgd);
+  font-family:"BV DM Sans",sans-serif;font-weight:600;font-size:30px;letter-spacing:.5px}
+.bv2 .t-foot::before,.bv2 .t-foot::after{content:"";flex:1;height:2px;background:linear-gradient(90deg,transparent,var(--tg))}
+.bv2 .t-foot::after{background:linear-gradient(270deg,transparent,var(--tg))}
+.bv2 .t-foot svg{width:40px;height:40px}
+.bv2 .t-arrow{position:absolute;left:50%;bottom:98px;width:74px;height:74px;margin-left:-37px;border-radius:50%;border:3px solid var(--tgd);display:grid;place-items:center;
+  color:var(--tgd);background:#fff;z-index:5}
+.bv2 .t-arrow svg{width:36px;height:36px}
+
+/* ---------- shared bits ---------- */
+.bv2.pg-toon .t-title{margin:0;line-height:1.06;font-size:calc(96px*var(--k)*var(--ts));color:var(--tink)}
+.bv2.pg-toon .t-title .g{color:var(--tgd)}
+.bv2 .t-sub{display:flex;align-items:center;justify-content:center;gap:18px;margin-top:calc(14px*var(--k));font-family:"BV Noto Sans Malayalam","BV DM Sans",sans-serif;
+  font-weight:700;font-size:calc(32px*var(--k)*var(--tx));color:var(--tink)}
+.bv2 .t-sub::before,.bv2 .t-sub::after{content:"";width:150px;height:2px;background:var(--tg);border-radius:2px}
+.bv2 .t-num{flex:none;display:grid;place-items:center;color:#fff;font-family:"BV DM Sans",sans-serif;font-weight:800;line-height:1;
+  background:linear-gradient(160deg,var(--tg),var(--tgd));box-shadow:0 8px 18px rgba(20,60,20,.2)}
+.bv2 .t-num.square{width:calc(150px*var(--k));height:calc(150px*var(--k));border-radius:calc(34px*var(--k));font-size:calc(96px*var(--k))}
+.bv2 .t-num.circle{width:calc(170px*var(--k));height:calc(170px*var(--k));border-radius:50%;font-size:calc(84px*var(--k));border:8px solid #fff;outline:2px solid var(--tgl2)}
+.bv2 .t-num.flag{width:calc(150px*var(--k));height:calc(150px*var(--k));border-radius:0 0 calc(40px*var(--k)) 0;font-size:calc(92px*var(--k))}
+.bv2 .t-rule{display:flex;align-items:center;gap:10px;margin-top:calc(14px*var(--k))}
+.bv2 .t-rule i{flex:1;height:3px;border-radius:2px;background:linear-gradient(90deg,var(--tg),rgba(46,125,50,.15))}
+.bv2 .t-rule b{width:12px;height:12px;border-radius:50%;background:var(--tg)}
+.bv2 .t-rule b+b{margin-left:-2px}
+.bv2 .t-rule svg{flex:none;width:34px;height:34px;color:var(--tg)}
+
+/* list */
+.bv2 .t-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:calc(20px*var(--k)*var(--tx))}
+.bv2 .t-list li{display:flex;align-items:center;gap:calc(26px*var(--k));min-width:0}
+.bv2 .t-ic{flex:none;width:calc(92px*var(--k)*var(--tx));height:calc(92px*var(--k)*var(--tx));border-radius:50%;display:grid;place-items:center;color:#fff;
+  background:linear-gradient(160deg,var(--tg),var(--tgd));box-shadow:0 0 0 calc(6px*var(--k)) var(--tgl)}
+.bv2 .t-ic svg{width:52%;height:52%}
+.bv2 .t-ic.pic{background:var(--tgl);padding:5px;box-shadow:0 0 0 4px var(--tg)}
+.bv2 .t-ic.pic img{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block}
+.bv2 .t-it{min-width:0;flex:1}
+.bv2 .t-it b{display:block;font-family:"BV DM Sans","BV Noto Sans Malayalam",sans-serif;font-weight:700;font-size:calc(38px*var(--k)*var(--tx));line-height:1.18;color:var(--tink)}
+.bv2 .t-it span{display:block;margin-top:4px;font-family:"BV Noto Sans Malayalam","BV DM Sans",sans-serif;font-weight:500;font-size:calc(24px*var(--k)*var(--tx));line-height:1.45;color:#3b4a3b}
+.bv2 .t-list.icon li,.bv2 .t-list.pics li{padding-bottom:calc(18px*var(--k)*var(--tx));background:radial-gradient(circle,var(--tg) 2px,transparent 2.5px) left bottom/12px 4px repeat-x}
+.bv2 .t-list.icon li:last-child,.bv2 .t-list.pics li:last-child{background:none;padding-bottom:0}
+.bv2 .t-list.pill li{background:#fff;border:2px solid #e3eadf;border-radius:999px;padding:calc(10px*var(--k)) calc(28px*var(--k)) calc(10px*var(--k)) calc(10px*var(--k));
+  box-shadow:0 6px 16px rgba(20,60,20,.06)}
+
+/* character */
+.bv2 .t-char{position:absolute;z-index:3;display:flex;align-items:flex-end;justify-content:center;pointer-events:none}
+.bv2 .t-char img{max-width:100%;max-height:100%;object-fit:contain;object-position:bottom center;display:block;filter:drop-shadow(0 16px 20px rgba(20,40,20,.18))}
+.bv2 .t-char.fade img{-webkit-mask-image:radial-gradient(75% 70% at 50% 45%,#000 60%,transparent 100%);mask-image:radial-gradient(75% 70% at 50% 45%,#000 60%,transparent 100%);filter:none}
+.bv2 .t-ph{width:88%;height:92%;border:4px dashed var(--tg);border-radius:48px;background:var(--tgl);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;
+  color:var(--tgd);font-family:"BV DM Sans",sans-serif;font-weight:700;font-size:26px;letter-spacing:3px;text-align:center}
+.bv2 .t-ph svg{width:46%;height:auto;opacity:.8}
+
+/* tip box */
+.bv2 .t-tip{position:relative;z-index:4;display:flex;align-items:center;gap:calc(22px*var(--k));background:linear-gradient(90deg,var(--tgl),#fff);border:2px solid var(--tgl2);
+  border-radius:calc(30px*var(--k));padding:calc(18px*var(--k)) calc(26px*var(--k))}
+.bv2 .t-tip .bulb{flex:none;width:calc(84px*var(--k));height:calc(84px*var(--k));border-radius:50%;background:linear-gradient(160deg,var(--tg),var(--tgd));color:#ffd54a;display:grid;place-items:center}
+.bv2 .t-tip .bulb svg{width:55%;height:55%}
+.bv2 .t-tip p{margin:0;font-family:"BV Noto Sans Malayalam","BV DM Sans",sans-serif;font-weight:600;font-size:calc(28px*var(--k)*var(--tx));line-height:1.5;color:var(--tgd)}
+
+/* icon row */
+.bv2 .t-row{display:flex;justify-content:space-around;gap:16px}
+.bv2 .t-row>div{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:calc(12px*var(--k));text-align:center}
+.bv2 .t-row .c{width:calc(96px*var(--k));height:calc(96px*var(--k));border-radius:50%;background:#fff;border:2px solid #dfe8d8;display:grid;place-items:center;color:var(--tgd);
+  box-shadow:0 6px 14px rgba(20,60,20,.08)}
+.bv2 .t-row .c svg{width:52%;height:52%}
+.bv2 .t-row span{font-family:"BV Noto Sans Malayalam","BV DM Sans",sans-serif;font-weight:700;font-size:calc(22px*var(--k)*var(--tx));line-height:1.35;color:var(--tink)}
+.bv2 .t-row.bare{justify-content:center;gap:0}
+.bv2 .t-row.bare>div+div{border-left:2px dotted #b9c9b0}
+.bv2 .t-row.bare .c{border:0;box-shadow:none;background:none}
+
+/* ---------- cover ---------- */
+.bv2 .tc-scene{position:absolute;left:0;right:0;bottom:0;height:52%;z-index:0;background-size:cover;background-position:center bottom;opacity:.95;
+  -webkit-mask-image:linear-gradient(180deg,transparent 0%,#000 35%);mask-image:linear-gradient(180deg,transparent 0%,#000 35%)}
+.bv2 .tc-copy{position:absolute;left:60px;width:600px;z-index:4;display:flex;flex-direction:column}
+.bv2.pg-toon .tc-copy .t-title{font-size:calc(118px*var(--k)*var(--ts));line-height:1.02;color:var(--tgd)}
+.bv2.pg-toon .tc-copy .t-title .dk{color:var(--tink)}
+.bv2.pg-toon .tc-copy .t-title svg{display:inline-block;width:.5em;height:.5em;vertical-align:.55em;margin-left:.1em}
+.bv2 .tc-sub{margin-top:calc(26px*var(--k));padding-top:calc(22px*var(--k));border-top:3px solid var(--tg);width:90%;font-family:"BV Noto Sans Malayalam","BV DM Sans",sans-serif;
+  font-weight:700;font-size:calc(34px*var(--k)*var(--tx));line-height:1.45;color:var(--tink)}
+.bv2 .tc-badge{align-self:flex-start;margin-top:calc(40px*var(--k));min-width:calc(250px*var(--k));padding:calc(22px*var(--k)) calc(30px*var(--k));border-radius:calc(40px*var(--k));
+  background:linear-gradient(160deg,var(--tg),var(--tgd));color:#fff;text-align:center;border:6px solid #fff;box-shadow:0 0 0 3px var(--tgl2),0 16px 30px rgba(20,60,20,.25)}
+.bv2 .tc-badge b{display:block;font-family:"BV DM Sans",sans-serif;font-weight:800;font-size:calc(120px*var(--k));line-height:.95}
+.bv2 .tc-badge span{display:block;margin-top:6px;font-family:"BV Baloo Chettan 2","BV Noto Sans Malayalam",sans-serif;font-weight:800;font-size:calc(38px*var(--k));line-height:1.1;color:#fff4c2}
+.bv2 .tc-row{position:absolute;left:40px;width:660px;z-index:4;background:rgba(255,255,255,.92);border-radius:40px;padding:26px 18px;box-shadow:0 10px 30px rgba(20,60,20,.1)}
+
+/* ---------- idea: card layout ---------- */
+.bv2 .ti-copy{position:absolute;left:44px;right:44px;z-index:2;display:flex;flex-direction:column}
+.bv2 .ti-top{text-align:center;padding:0 120px}
+.bv2 .ti-card{position:relative;flex:1 1 auto;margin-top:calc(34px*var(--k));background:#fff;border-radius:44px;border:2px solid #e8eee4;box-shadow:0 14px 40px rgba(20,60,20,.1);
+  padding:calc(40px*var(--k)) calc(40px*var(--k)) calc(36px*var(--k));display:flex;flex-direction:column}
+.bv2 .ti-head{display:flex;align-items:center;gap:calc(34px*var(--k));position:relative;z-index:4}
+.bv2 .ti-head .h{min-width:0;flex:1}
+.bv2.pg-toon .ti-head .t-title{font-size:calc(84px*var(--k)*var(--ts))}
+.bv2 .ti-head .t-rule{max-width:430px}
+.bv2 .ti-body{position:relative;flex:1 1 auto;display:flex;flex-direction:column;justify-content:center;margin-top:calc(34px*var(--k));width:52%;z-index:4}
+.bv2 .ti-card>.t-tip{margin-top:calc(26px*var(--k));width:68%}
+.bv2 .ti-card .t-char{right:-30px;bottom:0;height:calc(84%*var(--cs));width:52%}
+.bv2 .ti-rowwrap{margin-top:calc(28px*var(--k))}
+.bv2 .ti-card.flag{padding-top:0}
+.bv2 .ti-card.flag .t-num.flag{margin-left:calc(-40px*var(--k))}
+
+/* ---------- idea: split layout ---------- */
+.bv2 .ts-copy{position:absolute;left:60px;right:60px;z-index:4;display:flex;flex-direction:column}
+.bv2 .ts-head{display:flex;flex-direction:column;align-items:flex-start;gap:calc(20px*var(--k));width:58%}
+.bv2.pg-toon .ts-head .t-title{font-size:calc(122px*var(--k)*var(--ts));line-height:1.02}
+.bv2 .ts-head .t-rule{width:100%}
+.bv2 .ts-head .hs{font-family:"BV Noto Sans Malayalam","BV DM Sans",sans-serif;font-weight:700;font-size:calc(32px*var(--k)*var(--tx));line-height:1.45;color:var(--tink)}
+.bv2 .ts-list{width:58%;margin-top:calc(44px*var(--k))}
+.bv2 .ts-copy>.t-tip{margin-top:calc(34px*var(--k));width:70%}
+.bv2 .ts-arch{position:absolute;right:0;width:46%;z-index:1;border-radius:360px 0 0 0;background:linear-gradient(180deg,var(--tgl2),var(--tgl) 60%,rgba(255,255,255,0))}
+.bv2 .ts-char{right:0;width:50%}
+.bv2 .ts-rowwrap{margin-top:calc(30px*var(--k))}
+
+/* story: a little more air */
+.bv2.pg-toon:not(.feed) .ti-card{padding-top:calc(52px*var(--k))}
+.bv2.pg-toon .ti-series{font-size:calc(74px*var(--k)*var(--ts))}

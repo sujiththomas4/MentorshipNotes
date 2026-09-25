@@ -6,6 +6,13 @@ import type { CheckItem } from "@/content";
  */
 export const toCheck: CheckItem[] = [
   {
+    question: "Reminder for sir: \"Emotional\" (Nifty, 24) and \"Open auction inside the range\" (Aug 25).",
+    context: "Sir asked to be reminded about these two in a later class. Noted as written: \"Emotional - Nifty 24\", \"Open auction inside the range - Aug 25\".",
+    session: "05-open-auction",
+    added: "2026-09-25",
+    status: "open",
+  },
+  {
     question: "Poor high: \"within five days\" - does the market usually revisit / repair a poor high within five days? What if it does not?",
     context: "The note on poor high ended with \"so within five days\".",
     session: "04-previous-batch-day-3",

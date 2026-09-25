@@ -13,12 +13,16 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as KeyPointsRouteImport } from './routes/key-points'
 import { Route as NoteKitRouteImport } from './routes/note-kit'
 import { Route as SearchRouteImport } from './routes/search'
+import { Route as BrandingIndexRouteImport } from './routes/branding/index'
+import { Route as BrandingBethlehemValleyRouteImport } from './routes/branding/bethlehem-valley'
+import { Route as BrandingLogoRouteImport } from './routes/branding/logo'
 import { Route as SocialIndexRouteImport } from './routes/social/index'
 import { Route as MentorshipsMentorshipIndexRouteImport } from './routes/mentorships/$mentorship/index'
 import { Route as MentorshipsMentorshipSessionRouteImport } from './routes/mentorships/$mentorship/$session'
 import { Route as MentorshipsMentorshipToCheckRouteImport } from './routes/mentorships/$mentorship/to-check'
 import { Route as SocialPlatformIndexRouteImport } from './routes/social/$platform/index'
 import { Route as SocialPlatformTemplateRouteImport } from './routes/social/$platform/$template'
+import { Route as SocialPlatformPlannerRouteImport } from './routes/social/$platform/planner'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -38,6 +42,21 @@ const NoteKitRoute = NoteKitRouteImport.update({
 const SearchRoute = SearchRouteImport.update({
   id: '/search',
   path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BrandingIndexRoute = BrandingIndexRouteImport.update({
+  id: '/branding/',
+  path: '/branding/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BrandingBethlehemValleyRoute = BrandingBethlehemValleyRouteImport.update({
+  id: '/branding/bethlehem-valley',
+  path: '/branding/bethlehem-valley',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BrandingLogoRoute = BrandingLogoRouteImport.update({
+  id: '/branding/logo',
+  path: '/branding/logo',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SocialIndexRoute = SocialIndexRouteImport.update({
@@ -73,16 +92,25 @@ const SocialPlatformTemplateRoute = SocialPlatformTemplateRouteImport.update({
   path: '/social/$platform/$template',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SocialPlatformPlannerRoute = SocialPlatformPlannerRouteImport.update({
+  id: '/social/$platform/planner',
+  path: '/social/$platform/planner',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/key-points': typeof KeyPointsRoute
   '/note-kit': typeof NoteKitRoute
   '/search': typeof SearchRoute
+  '/branding/bethlehem-valley': typeof BrandingBethlehemValleyRoute
+  '/branding/logo': typeof BrandingLogoRoute
+  '/branding/': typeof BrandingIndexRoute
   '/social/': typeof SocialIndexRoute
   '/mentorships/$mentorship/$session': typeof MentorshipsMentorshipSessionRoute
   '/mentorships/$mentorship/to-check': typeof MentorshipsMentorshipToCheckRoute
   '/social/$platform/$template': typeof SocialPlatformTemplateRoute
+  '/social/$platform/planner': typeof SocialPlatformPlannerRoute
   '/mentorships/$mentorship/': typeof MentorshipsMentorshipIndexRoute
   '/social/$platform/': typeof SocialPlatformIndexRoute
 }
@@ -91,10 +119,14 @@ export interface FileRoutesByTo {
   '/key-points': typeof KeyPointsRoute
   '/note-kit': typeof NoteKitRoute
   '/search': typeof SearchRoute
+  '/branding/bethlehem-valley': typeof BrandingBethlehemValleyRoute
+  '/branding/logo': typeof BrandingLogoRoute
+  '/branding': typeof BrandingIndexRoute
   '/social': typeof SocialIndexRoute
   '/mentorships/$mentorship/$session': typeof MentorshipsMentorshipSessionRoute
   '/mentorships/$mentorship/to-check': typeof MentorshipsMentorshipToCheckRoute
   '/social/$platform/$template': typeof SocialPlatformTemplateRoute
+  '/social/$platform/planner': typeof SocialPlatformPlannerRoute
   '/mentorships/$mentorship': typeof MentorshipsMentorshipIndexRoute
   '/social/$platform': typeof SocialPlatformIndexRoute
 }
@@ -104,10 +136,14 @@ export interface FileRoutesById {
   '/key-points': typeof KeyPointsRoute
   '/note-kit': typeof NoteKitRoute
   '/search': typeof SearchRoute
+  '/branding/bethlehem-valley': typeof BrandingBethlehemValleyRoute
+  '/branding/logo': typeof BrandingLogoRoute
+  '/branding/': typeof BrandingIndexRoute
   '/social/': typeof SocialIndexRoute
   '/mentorships/$mentorship/$session': typeof MentorshipsMentorshipSessionRoute
   '/mentorships/$mentorship/to-check': typeof MentorshipsMentorshipToCheckRoute
   '/social/$platform/$template': typeof SocialPlatformTemplateRoute
+  '/social/$platform/planner': typeof SocialPlatformPlannerRoute
   '/mentorships/$mentorship/': typeof MentorshipsMentorshipIndexRoute
   '/social/$platform/': typeof SocialPlatformIndexRoute
 }
@@ -118,10 +154,14 @@ export interface FileRouteTypes {
     | '/key-points'
     | '/note-kit'
     | '/search'
+    | '/branding/bethlehem-valley'
+    | '/branding/logo'
+    | '/branding/'
     | '/social/'
     | '/mentorships/$mentorship/$session'
     | '/mentorships/$mentorship/to-check'
     | '/social/$platform/$template'
+    | '/social/$platform/planner'
     | '/mentorships/$mentorship/'
     | '/social/$platform/'
   fileRoutesByTo: FileRoutesByTo
@@ -130,10 +170,14 @@ export interface FileRouteTypes {
     | '/key-points'
     | '/note-kit'
     | '/search'
+    | '/branding/bethlehem-valley'
+    | '/branding/logo'
+    | '/branding'
     | '/social'
     | '/mentorships/$mentorship/$session'
     | '/mentorships/$mentorship/to-check'
     | '/social/$platform/$template'
+    | '/social/$platform/planner'
     | '/mentorships/$mentorship'
     | '/social/$platform'
   id:
@@ -142,10 +186,14 @@ export interface FileRouteTypes {
     | '/key-points'
     | '/note-kit'
     | '/search'
+    | '/branding/bethlehem-valley'
+    | '/branding/logo'
+    | '/branding/'
     | '/social/'
     | '/mentorships/$mentorship/$session'
     | '/mentorships/$mentorship/to-check'
     | '/social/$platform/$template'
+    | '/social/$platform/planner'
     | '/mentorships/$mentorship/'
     | '/social/$platform/'
   fileRoutesById: FileRoutesById
@@ -155,10 +203,14 @@ export interface RootRouteChildren {
   KeyPointsRoute: typeof KeyPointsRoute
   NoteKitRoute: typeof NoteKitRoute
   SearchRoute: typeof SearchRoute
+  BrandingBethlehemValleyRoute: typeof BrandingBethlehemValleyRoute
+  BrandingLogoRoute: typeof BrandingLogoRoute
+  BrandingIndexRoute: typeof BrandingIndexRoute
   SocialIndexRoute: typeof SocialIndexRoute
   MentorshipsMentorshipSessionRoute: typeof MentorshipsMentorshipSessionRoute
   MentorshipsMentorshipToCheckRoute: typeof MentorshipsMentorshipToCheckRoute
   SocialPlatformTemplateRoute: typeof SocialPlatformTemplateRoute
+  SocialPlatformPlannerRoute: typeof SocialPlatformPlannerRoute
   MentorshipsMentorshipIndexRoute: typeof MentorshipsMentorshipIndexRoute
   SocialPlatformIndexRoute: typeof SocialPlatformIndexRoute
 }
@@ -191,6 +243,27 @@ declare module '@tanstack/react-router' {
       path: '/search'
       fullPath: '/search'
       preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/branding/': {
+      id: '/branding/'
+      path: '/branding'
+      fullPath: '/branding/'
+      preLoaderRoute: typeof BrandingIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/branding/bethlehem-valley': {
+      id: '/branding/bethlehem-valley'
+      path: '/branding/bethlehem-valley'
+      fullPath: '/branding/bethlehem-valley'
+      preLoaderRoute: typeof BrandingBethlehemValleyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/branding/logo': {
+      id: '/branding/logo'
+      path: '/branding/logo'
+      fullPath: '/branding/logo'
+      preLoaderRoute: typeof BrandingLogoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/social/': {
@@ -235,6 +308,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SocialPlatformTemplateRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/social/$platform/planner': {
+      id: '/social/$platform/planner'
+      path: '/social/$platform/planner'
+      fullPath: '/social/$platform/planner'
+      preLoaderRoute: typeof SocialPlatformPlannerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -243,10 +323,14 @@ const rootRouteChildren: RootRouteChildren = {
   KeyPointsRoute: KeyPointsRoute,
   NoteKitRoute: NoteKitRoute,
   SearchRoute: SearchRoute,
+  BrandingBethlehemValleyRoute: BrandingBethlehemValleyRoute,
+  BrandingLogoRoute: BrandingLogoRoute,
+  BrandingIndexRoute: BrandingIndexRoute,
   SocialIndexRoute: SocialIndexRoute,
   MentorshipsMentorshipSessionRoute: MentorshipsMentorshipSessionRoute,
   MentorshipsMentorshipToCheckRoute: MentorshipsMentorshipToCheckRoute,
   SocialPlatformTemplateRoute: SocialPlatformTemplateRoute,
+  SocialPlatformPlannerRoute: SocialPlatformPlannerRoute,
   MentorshipsMentorshipIndexRoute: MentorshipsMentorshipIndexRoute,
   SocialPlatformIndexRoute: SocialPlatformIndexRoute,
 }
