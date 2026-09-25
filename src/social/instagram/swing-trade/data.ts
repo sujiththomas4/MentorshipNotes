@@ -1,4 +1,5 @@
 import type { IgLogoVariant } from "@/social/instagram/kit";
+import { defaultLayout, mergeLayout, type IgLayout, type IgTheme } from "@/social/instagram/layout";
 
 /*
  * Indian Traders — Swing Trade (single post, 1080 × 1350). Field names follow the original
@@ -7,6 +8,11 @@ import type { IgLogoVariant } from "@/social/instagram/kit";
 
 export type Direction = "BUY" | "SELL";
 export type LogoBg = "none" | "plate" | "shield";
+
+export const SWING_THEMES: IgTheme[] = [
+  { id: "light", label: "Light", swatch: ["#fbfcfd", "#12355B", "#0AA66A"] },
+  { id: "navy", label: "Dark navy", swatch: ["#0e2239", "#8cb8ea", "#0AA66A"] },
+];
 
 export type SwingTradeData = {
   /** yyyy-mm-dd */
@@ -48,6 +54,8 @@ export type SwingTradeData = {
   titleB: string;
   script: [string, string, string];
   footer: string;
+  /** format (feed / story), header + footer on/off, colour theme */
+  layout: IgLayout;
 };
 
 function todayIso() {
@@ -86,6 +94,7 @@ export function defaultData(): SwingTradeData {
     titleB: "TRADING",
     script: ["Plan", "Execute", "Grow"],
     footer: "TRADE SMART   |   LEARN DAILY   |   GROW TOGETHER",
+    layout: defaultLayout("light"),
   };
 }
 
@@ -155,6 +164,7 @@ export function mergeData(raw: Partial<Record<keyof SwingTradeData, unknown>> | 
     titleB: s(raw.titleB, base.titleB),
     script,
     footer: s(raw.footer, base.footer),
+    layout: mergeLayout(raw.layout, base.layout, SWING_THEMES),
   };
 }
 

@@ -3,8 +3,9 @@ import { usePlannedDraft } from "@/social/saved-posts";
 import { Download, FolderDown, Loader2, RotateCcw } from "lucide-react";
 import { downloadSvgAsPng, saveAllAsPng, svgToPngBlob } from "@/social/export";
 import { VideoDownload } from "@/social/video-ui";
+import { igH } from "@/social/instagram/layout";
+import { LayoutPanel } from "@/social/instagram/layout-ui";
 import {
-  IG_H,
   IG_LOGOS,
   IG_W,
   SENTIMENT,
@@ -13,6 +14,7 @@ import {
 } from "@/social/instagram/kit";
 import { cn } from "@/lib/utils";
 import {
+  GLOBAL_THEMES,
   MARKET_ORDER,
   SLIDE_FILES,
   defaultData,
@@ -68,6 +70,7 @@ export function GlobalMarketEditor() {
     }));
 
   const folder = data.date || "undated";
+  const H = igH(data.layout);
 
   async function downloadOne() {
     const svg = thumbs.current[active];
@@ -75,7 +78,7 @@ export function GlobalMarketEditor() {
     setBusy("one");
     setMsg("");
     try {
-      await downloadSvgAsPng(svg, IG_W, IG_H, `${SLIDE_FILES[active]}.png`);
+      await downloadSvgAsPng(svg, IG_W, H, `${SLIDE_FILES[active]}.png`);
     } catch (e) {
       setMsg(e instanceof Error ? e.message : "Export failed");
     } finally {
@@ -91,7 +94,7 @@ export function GlobalMarketEditor() {
         svg: thumbs.current[id]!,
         filename: `${SLIDE_FILES[id]}.png`,
       })).filter((x) => x.svg);
-      const how = await saveAllAsPng(items, IG_W, IG_H, folder);
+      const how = await saveAllAsPng(items, IG_W, H, folder);
       if (how === "folder")
         setMsg(`Saved ${items.length} images in the folder “${folder}”.`);
       if (how === "downloads")
@@ -176,6 +179,14 @@ export function GlobalMarketEditor() {
       <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_minmax(0,540px)]">
         {/* controls for the selected slide */}
         <div className="space-y-6">
+          <LayoutPanel
+            value={data.layout}
+            onChange={(l) => set("layout", l)}
+            themes={GLOBAL_THEMES}
+            header="Show header (logo, date)"
+            footer="Show footer (swipe, page number)"
+            note="Applies to all 7 slides."
+          />
           {active === "cover" ? (
             <CoverControls
               data={data}
@@ -214,7 +225,7 @@ export function GlobalMarketEditor() {
                   Compare with reference
                 </button>
                 <span className="rounded-full bg-secondary px-2.5 py-0.5 font-mono text-xs text-muted-foreground">
-                  1080 × 1350
+                  1080 × {H}
                 </span>
               </span>
             </div>
@@ -242,11 +253,17 @@ export function GlobalMarketEditor() {
                 </figure>
               </div>
             ) : (
-              <Slide
-                id={active}
-                data={data}
-                className="block h-auto w-full rounded-lg shadow-lg"
-              />
+              <div
+                className={cn(
+                  data.layout.format === "story" && "mx-auto max-w-[400px]",
+                )}
+              >
+                <Slide
+                  id={active}
+                  data={data}
+                  className="block h-auto w-full rounded-lg shadow-lg"
+                />
+              </div>
             )}
             <div className="mt-4 grid gap-2 sm:grid-cols-2">
               <button
@@ -280,11 +297,11 @@ export function GlobalMarketEditor() {
               getPng={async () => {
                 const svg = thumbs.current[active];
                 if (!svg) throw new Error("slide not ready");
-                return svgToPngBlob(svg, IG_W, IG_H);
+                return svgToPngBlob(svg, IG_W, H);
               }}
               fileBase={`${folder}_${SLIDE_FILES[active]}`}
               w={IG_W}
-              h={IG_H}
+              h={H}
               onMsg={setMsg}
             />
             {msg && <p className="mt-2 text-sm text-muted-foreground">{msg}</p>}

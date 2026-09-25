@@ -5,7 +5,7 @@
  * are fetched once and embedded into the SVG as data URLs before rendering.
  */
 
-const FONT_CSS = "https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800;900&family=Lobster+Two:ital,wght@1,700&display=swap";
+const FONT_CSS = "https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800;900&family=Lobster+Two:ital,wght@1,700&family=Poppins:wght@400;500;600;700&family=Permanent+Marker&family=Barlow+Condensed:wght@600;700&display=swap";
 let fontCssPromise: Promise<string> | null = null;
 
 async function toDataUrl(url: string) {
@@ -24,7 +24,7 @@ function imageDataUrl(url: string) {
   return imageCache.get(url)!;
 }
 
-/** Inter @font-face rules with the font files inlined. Empty string if offline. */
+/** Inter / Poppins @font-face rules with the font files inlined. Empty string if offline. */
 function embeddedFontCss() {
   fontCssPromise ??= (async () => {
     try {

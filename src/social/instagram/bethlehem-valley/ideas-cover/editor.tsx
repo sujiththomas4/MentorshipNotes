@@ -2,7 +2,7 @@ import { useState } from "react";
 import { RotateCcw } from "lucide-react";
 import { BV_VARIANTS } from "@/branding/bethlehem-valley";
 import { cn } from "@/lib/utils";
-import { Check, Field, JsonButtons, LogoPicker, Panel, PreviewCard, btn, inputCls, useStoredPost } from "../editor-kit";
+import { Check, Field, FormatPanel, JsonButtons, LogoPicker, Panel, PreviewCard, btn, inputCls, useStoredPost } from "../editor-kit";
 import { BrandTitlePanel } from "../brand-title";
 import { ImagePicker } from "../image-library";
 import { ICON_NAMES, bvFileBase } from "../shared";
@@ -49,7 +49,7 @@ export function IdeasCoverEditor() {
     <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_minmax(0,540px)]">
       <div className="space-y-6">
         <div className="flex flex-wrap gap-2">
-          <JsonButtons data={data} fileBase={bvFileBase(data.category, "feed")} onOpen={(raw) => setData(mergeData(raw))} onMsg={setMsg} check={(raw) => "title1" in raw && "badgeNumber" in raw} />
+          <JsonButtons data={data} fileBase={bvFileBase(data.category, data.format)} onOpen={(raw) => setData(mergeData(raw))} onMsg={setMsg} check={(raw) => "title1" in raw && "badgeNumber" in raw} />
           <button
             type="button"
             onClick={() => confirm("Replace everything with the sample post?") && (setData(sampleData()), setMsg("Reset to the sample post."))}
@@ -58,6 +58,8 @@ export function IdeasCoverEditor() {
             <RotateCcw className="h-4 w-4" /> Reset to sample post
           </button>
         </div>
+
+        <FormatPanel data={data} set={set} note="Story stretches the layout: the photo and farmer fill the height, the footer moves to the bottom." />
 
         <Panel title="Heading" note="Slide number, three-line title and the two lines under the divider. Long lines shrink to fit.">
           <div className="grid gap-4 sm:grid-cols-2">

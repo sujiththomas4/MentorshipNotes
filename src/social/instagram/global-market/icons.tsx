@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { IG } from "@/social/instagram/kit";
+import { IG, useIg } from "@/social/instagram/kit";
 import type { MarketKey } from "./data";
 
 /* Market icons, drawn in an 88 × 88 box. `uid` keeps clip-path ids unique per slide. */
@@ -93,6 +93,7 @@ const ICONS: Record<MarketKey, (p: { uid: string }) => ReactNode> = {
 
 /** Round icon tile for a market, `size` px wide, top-left at x, y. */
 export function MarketIcon({ k, x, y, size, uid }: { k: MarketKey; x: number; y: number; size: number; uid: string }) {
+  const IG = useIg();
   const Icon = ICONS[k];
   return (
     <g transform={`translate(${x} ${y})`}>

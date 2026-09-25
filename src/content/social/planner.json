@@ -8,20 +8,8 @@
       "days": [],
       "time": "",
       "note": "",
-      "active": true
-    },
-    {
-      "id": "mugtknupglsq",
-      "templateId": "Instagram_BV_Welcome",
-      "days": [
-        1,
-        2,
-        3,
-        4
-      ],
-      "time": "",
-      "note": "",
-      "active": true
+      "active": true,
+      "from": ""
     },
     {
       "id": "default:Instagram_GlobalMarket_All",
@@ -35,7 +23,39 @@
       ],
       "time": "",
       "note": "",
-      "active": true
+      "active": true,
+      "from": ""
+    },
+    {
+      "id": "muhaii8evegq",
+      "templateId": "Instagram_SwingTrade",
+      "days": [
+        0
+      ],
+      "time": "",
+      "note": "",
+      "active": true,
+      "from": ""
+    },
+    {
+      "id": "muhatlankuqg",
+      "templateId": "Instagram_WeeklyOptionSelling",
+      "days": [],
+      "time": "",
+      "note": "",
+      "active": true,
+      "from": ""
+    },
+    {
+      "id": "muhawicj3fvb",
+      "templateId": "Instagram_TradingPsychology",
+      "days": [
+        6
+      ],
+      "time": "",
+      "note": "",
+      "active": true,
+      "from": ""
     }
   ],
   "oneOffs": [],

@@ -1,4 +1,10 @@
 import type { IgLogoVariant, Sentiment } from "@/social/instagram/kit";
+import { defaultLayout, mergeLayout, type IgLayout, type IgTheme } from "@/social/instagram/layout";
+
+export const GLOBAL_THEMES: IgTheme[] = [
+  { id: "navy", label: "Navy", swatch: ["#031321", "#061b2b", "#20e878"] },
+  { id: "black", label: "Black", swatch: ["#050505", "#131313", "#20e878"] },
+];
 
 export type MarketKey = "dow" | "crudeOil" | "dollarIndex" | "giftNifty" | "oiBuildup" | "preOpen";
 
@@ -48,6 +54,8 @@ export type GlobalMarketData = {
   /** opacity of the chart pictures on BULLISH / BEARISH slides (%) */
   chartOpacity: number;
   markets: Record<MarketKey, MarketItem>;
+  /** format (feed / story), header + footer on/off, colour theme; applies to all 7 slides */
+  layout: IgLayout;
 };
 
 export const MARKET_ORDER: MarketKey[] = ["dow", "crudeOil", "dollarIndex", "giftNifty", "oiBuildup", "preOpen"];
@@ -101,6 +109,7 @@ export function defaultData(): GlobalMarketData {
     coverDim: 30,
     cardOpacity: 72,
     chartOpacity: 100,
+    layout: defaultLayout("navy"),
     markets: {
       dow: item({ name: "DOW", title: "DOW", subtitle: "(U.S. Stock Market)", sentiment: "BULLISH" }),
       crudeOil: item({ name: "CRUDE OIL", title: "CRUDE OIL", subtitle: "(WTI)", sentiment: "BEARISH" }),
@@ -125,7 +134,7 @@ export function mergeData(saved: Partial<GlobalMarketData> | null): GlobalMarket
   if (!saved) return base;
   const markets = { ...base.markets };
   for (const k of MARKET_ORDER) markets[k] = { ...base.markets[k], ...(saved.markets?.[k] ?? {}) };
-  return { ...base, ...saved, markets };
+  return { ...base, ...saved, markets, layout: mergeLayout(saved.layout, base.layout, GLOBAL_THEMES) };
 }
 
 /** "72.14, 71.9 72.5" → [72.14, 71.9, 72.5] (anything non-numeric ignored). */

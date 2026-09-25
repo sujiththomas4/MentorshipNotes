@@ -1,4 +1,5 @@
-import { AnnotatedFigure, Callout, Pending, Section } from "@/components/notes";
+import { Link } from "@tanstack/react-router";
+import { AnnotatedFigure, Callout, Figure, Pending, Scenarios, Section, Steps } from "@/components/notes";
 import type { SessionMeta } from "@/content";
 
 /*
@@ -16,7 +17,10 @@ export const meta: SessionMeta = {
     "The current day's value area is the developing value area: not used in the current day, but important for the next day.",
     "Important: an open auction inside the range lets the market go sideways, with false breakouts.",
     "Volume profile: the max volume level is shown in yellow. The market went back there and was rejected.",
+    "Tip, AB poor low: after B, if the high of A or B breaks up, the market is trending up.",
+    "Tip, AB poor high: after B, if the market closes below the low of A or B, the market is trending down.",
     "UFA = unfinished auction.",
+    "Anomalies matter when building the market context. Examples: tail or excess, gaps at the open, long-term excess (unfilled gap with an OD opening), gaps between / inside candles (order flow only), poor high / low, single prints, structural anomalies in a day or merged profile.",
   ],
 };
 
@@ -76,6 +80,39 @@ export default function Content() {
         />
       </Section>
 
+      <Section title="AB poor high / low: trend tip">
+        <Callout kind="tip" title="After the B period">
+          <p>With an AB poor high or low, watch what happens after B: it tells the trend.</p>
+        </Callout>
+        <Scenarios
+          items={[
+            {
+              tag: "AB poor low",
+              tone: "bull",
+              when: "the high of A or B breaks up (after B)",
+              then: "the market is trending up.",
+            },
+            {
+              tag: "AB poor high",
+              tone: "bear",
+              when: "the market closes below the low of A or B",
+              then: "the market is trending down.",
+            },
+          ]}
+        />
+        <p>
+          What an AB poor high / low is:{" "}
+          <Link
+            to="/mentorships/$mentorship/$session"
+            params={{ mentorship: "market-profile", session: "04-previous-batch-day-3" }}
+            hash="good-high-poor-high"
+          >
+            Session 4, good high / poor high
+          </Link>
+          .
+        </p>
+      </Section>
+
       <Section title="UFA: unfinished auction">
         <Callout kind="definition" title="UFA">
           <p>
@@ -93,6 +130,33 @@ export default function Content() {
             { x: 20, y: 58, text: "The area bracketed and marked UFA (unfinished auction)." },
             { x: 94, y: 4, text: "Line drawn up to the circled level at the top (yellow line)." },
           ]}
+        />
+      </Section>
+
+      <Section title="Anomaly in market profile">
+        <p>
+          <strong>What is an "anomaly" in market profile, and why it matters when building the market context.</strong>
+        </p>
+        <h3>Anomaly examples</h3>
+        <Steps
+          items={[
+            { title: "Tail or excess", body: "Pointed at in class." },
+            { title: "Gaps during market opening" },
+            { title: "Long-term excess", body: "A gap with an OD opening that is not filled." },
+            {
+              title: "Gaps between candles and gaps inside candles",
+              body: "Can only be observed in order flow.",
+            },
+            { title: "Poor high and poor low" },
+            { title: "Single prints" },
+            { title: "Structural anomalies in a day profile or a merged profile" },
+          ]}
+        />
+        <Figure
+          src="market-profile/05-open-auction/03-anomaly-examples.png"
+          alt="Slide: What is an anomaly in market profile and its importance during making market context, with seven anomaly examples"
+          caption="Anomaly examples, from the class slide"
+          width="md"
         />
       </Section>
     </>

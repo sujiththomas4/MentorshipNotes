@@ -1,6 +1,6 @@
 import { BV_VARIANTS } from "@/branding/bethlehem-valley";
 import { defaultBrandTitle, mergeBrandTitle, type BrandTitle } from "../brand-title";
-import { BV_ART, type BvFormat } from "../shared";
+import { BV_ART, BV_THEMES, type BvFormat, type BvTheme } from "../shared";
 
 /*
  * Bethlehem Valley "Ideas Cover" feed post, from Bethlehem_Valley_1080x1350_outlined.svg:
@@ -12,8 +12,11 @@ import { BV_ART, type BvFormat } from "../shared";
 export type IdeaFeature = { icon: string; label: string };
 
 export type IdeasCoverData = {
-  /** always the 1080 × 1350 feed (the layout is drawn for it) */
+  /** feed 1080 × 1350 or story 1080 × 1920 (the layout stretches) */
   format: BvFormat;
+  showHeader: boolean;
+  showFooter: boolean;
+  theme: BvTheme;
   /** used for the file name only */
   category: string;
   /** 0 = the round emblem from the design, 1–8 = Branding logo variants */
@@ -51,6 +54,9 @@ export const DESIGN_LOGO = `${BV_ART}/ideas/logo.png`;
 export function sampleData(): IdeasCoverData {
   return {
     format: "feed",
+    showHeader: true,
+    showFooter: true,
+    theme: "forest",
     category: "10 FARM IDEAS",
     logo: 0,
     brandTitle: defaultBrandTitle(),
@@ -97,8 +103,12 @@ export function mergeData(raw: Record<string, unknown> | null): IdeasCoverData {
     const r = Array.isArray(raw.features) ? (raw.features as Partial<IdeaFeature>[])[i] : undefined;
     return { icon: str(r?.icon, f.icon), label: str(r?.label, f.label) };
   });
+  const flag = (k: "showHeader" | "showFooter") => (typeof raw[k] === "boolean" ? (raw[k] as boolean) : base[k]);
   return {
-    format: "feed",
+    format: raw.format === "story" ? "story" : "feed",
+    showHeader: flag("showHeader"),
+    showFooter: flag("showFooter"),
+    theme: BV_THEMES.some((t) => t.id === raw.theme) ? (raw.theme as BvTheme) : base.theme,
     category: str(raw.category, base.category),
     logo: Math.round(num("logo", 0, BV_VARIANTS.length)),
     brandTitle: mergeBrandTitle(raw.brandTitle),

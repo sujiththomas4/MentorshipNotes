@@ -1,6 +1,6 @@
 import { BV_VARIANTS } from "@/branding/bethlehem-valley";
 import { defaultBrandTitle, mergeBrandTitle, type BrandTitle } from "../brand-title";
-import { BV_ART, type BvFormat } from "../shared";
+import { BV_ART, BV_THEMES, type BvFormat, type BvTheme } from "../shared";
 
 /*
  * Bethlehem Valley "Tips List" feed post, from bethlehem-valley_01_outlined.svg:
@@ -12,8 +12,11 @@ export type TipItem = { icon: string; title: string; body: string };
 export type TipBenefit = { icon: string; label: string };
 
 export type TipsListData = {
-  /** always the 1080 × 1350 feed (the layout is drawn for it) */
+  /** feed 1080 × 1350 or story 1080 × 1920 (the layout stretches) */
   format: BvFormat;
+  showHeader: boolean;
+  showFooter: boolean;
+  theme: BvTheme;
   /** used for the file name only */
   category: string;
   /** 0 = the round emblem from the design, 1–8 = Branding logo variants */
@@ -47,6 +50,9 @@ export const DEFAULT_FARMER = `${BV_ART}/tips/farmer.webp`;
 export function sampleData(): TipsListData {
   return {
     format: "feed",
+    showHeader: true,
+    showFooter: true,
+    theme: "forest",
     category: "PEPPER TIPS",
     logo: 0,
     brandTitle: defaultBrandTitle(),
@@ -100,8 +106,12 @@ export function mergeData(raw: Record<string, unknown> | null): TipsListData {
     const r = Array.isArray(raw.benefits) ? (raw.benefits as Partial<TipBenefit>[])[i] : undefined;
     return { icon: str(r?.icon, b.icon), label: str(r?.label, b.label) };
   });
+  const flag = (k: "showHeader" | "showFooter") => (typeof raw[k] === "boolean" ? (raw[k] as boolean) : base[k]);
   return {
-    format: "feed",
+    format: raw.format === "story" ? "story" : "feed",
+    showHeader: flag("showHeader"),
+    showFooter: flag("showFooter"),
+    theme: BV_THEMES.some((t) => t.id === raw.theme) ? (raw.theme as BvTheme) : base.theme,
     category: str(raw.category, base.category),
     logo: Math.round(num("logo", 0, BV_VARIANTS.length)),
     brandTitle: mergeBrandTitle(raw.brandTitle),

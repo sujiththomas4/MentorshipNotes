@@ -1,5 +1,6 @@
 import { forwardRef, type ReactNode } from "react";
-import { IG_H, IG_LOGOS, IG_W, fitFont } from "@/social/instagram/kit";
+import { IG_LOGOS, IG_W, fitFont } from "@/social/instagram/kit";
+import { igH } from "@/social/instagram/layout";
 import { fmtInt, fmtPrice, fmtRupees, formatDate, num, pnl, type Leg, type OptionSellingData } from "./data";
 
 /*
@@ -13,6 +14,11 @@ const ART = "/social/instagram/option-selling";
 const GOLD = "#f5b800";
 const LINE_GOLD = "#e8b923";
 const HEAD = "#aab3ea";
+/** Background + box fills per colour theme (the gold stays in both). */
+const THEMES: Record<string, { bg: [string, string, string]; box: string; table: [string, string] }> = {
+  gold: { bg: ["#07080b", "#040506", "#050607"], box: "#0a0a0a", table: ["#0c0e12", "#060709"] },
+  navy: { bg: ["#13305c", "#0b2045", "#081733"], box: "#0c1f3d", table: ["#10254a", "#0b1b38"] },
+};
 const t = (size: number, weight: number, fill: string) => ({ fontFamily: FONT, fontSize: size, fontWeight: weight, fill });
 /** rough width of Inter text, per px of font size per character */
 const w = (text: string, size: number, k = 0.6) => text.length * size * k;
@@ -30,9 +36,7 @@ const CAL = (
     <rect x="6" y="11" width="52" height="47" rx="7" stroke="url(#os-gc)" strokeWidth="5" />
     <path d="M6 24h52" stroke="url(#os-gc)" strokeWidth="5" />
     <path d="M19 5v12M45 5v12" stroke="url(#os-gc)" strokeWidth="5" strokeLinecap="round" />
-    <g fill="url(#os-gc)">
-      {[31, 42].flatMap((yy) => [15, 28, 41].map((xx) => <rect key={`${xx}-${yy}`} x={xx} y={yy} width="9" height="7" rx="1" />))}
-    </g>
+    <g fill="url(#os-gc)">{[31, 42].flatMap((yy) => [15, 28, 41].map((xx) => <rect key={`${xx}-${yy}`} x={xx} y={yy} width="9" height="7" rx="1" />))}</g>
   </>
 );
 
@@ -44,12 +48,7 @@ const FOOT_ICONS = [
     <path d="M24 26L43 7M36 5l8 1 1 8" stroke={GOLD} strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
   </>,
   <>
-    <path
-      d="M25 4l4 6 7-2 1 7 7 2-3 6 5 5-6 4 2 7-7 1-2 7-6-3-5 5-4-6-7 1v-7l-7-3 4-6-4-5 6-4-1-7 7 0 2-7 6 3z"
-      stroke={GOLD}
-      strokeWidth="3.2"
-      strokeLinejoin="round"
-    />
+    <path d="M25 4l4 6 7-2 1 7 7 2-3 6 5 5-6 4 2 7-7 1-2 7-6-3-5 5-4-6-7 1v-7l-7-3 4-6-4-5 6-4-1-7 7 0 2-7 6 3z" stroke={GOLD} strokeWidth="3.2" strokeLinejoin="round" />
     <circle cx="25" cy="25" r="8" stroke={GOLD} strokeWidth="3.5" />
   </>,
   <>
@@ -74,10 +73,7 @@ function GlowLines({ x, y, width, h }: { x: number; y: number; width: number; h:
   );
 }
 
-export const OptionSellingArtwork = forwardRef<SVGSVGElement, { data: OptionSellingData; className?: string }>(function OptionSellingArtwork(
-  { data: d, className },
-  ref,
-) {
+export const OptionSellingArtwork = forwardRef<SVGSVGElement, { data: OptionSellingData; className?: string }>(function OptionSellingArtwork({ data: d, className }, ref) {
   const closed = d.mode === "CLOSE";
   const legs = d.legs.slice(0, 4);
   const n = Math.max(legs.length, 1);
@@ -86,6 +82,11 @@ export const OptionSellingArtwork = forwardRef<SVGSVGElement, { data: OptionSell
   const logo = IG_LOGOS[d.logo];
   const logoH = d.logo === "horizontal" ? 104 : 132;
   const logoW = (logo.w / logo.h) * logoH;
+  const T = THEMES[d.layout.theme] ?? THEMES.gold;
+  const H = igH(d.layout);
+  const story = d.layout.format === "story";
+  // the title block (art, titles, badge) moves down in a story and up when the header is off
+  const topDy = (story ? 110 : 0) - (d.layout.showHeader ? 0 : 100);
 
   // ---- lower stack: info, table, P&L (CLOSE), footer ----
   const rowH = Math.min(122, Math.floor(300 / n));
@@ -94,12 +95,12 @@ export const OptionSellingArtwork = forwardRef<SVGSVGElement, { data: OptionSell
   const TABLE_H = HEAD_H + rowH * n;
   const PNL_H = 122;
   const FOOT_H = 50;
-  const top = 572;
-  const bottom = 1290;
+  const top = 572 + topDy;
+  const bottom = d.layout.showFooter ? H - 60 : H - 44 + FOOT_H;
   const blocks = [INFO_H, TABLE_H, ...(closed ? [PNL_H] : [])];
   const footY = bottom - FOOT_H;
   const free = footY - top - blocks.reduce((a, b) => a + b, 0);
-  const gap = Math.min(64, free / blocks.length);
+  const gap = Math.min(story ? 120 : 64, free / blocks.length);
   let cursor = top + (free - gap * blocks.length) / 2;
   const infoY = cursor;
   cursor += INFO_H + gap;
@@ -152,9 +153,9 @@ export const OptionSellingArtwork = forwardRef<SVGSVGElement, { data: OptionSell
   return (
     <svg
       ref={ref}
-      viewBox={`0 0 ${IG_W} ${IG_H}`}
+      viewBox={`0 0 ${IG_W} ${H}`}
       width={IG_W}
-      height={IG_H}
+      height={H}
       xmlns="http://www.w3.org/2000/svg"
       className={className}
       role="img"
@@ -162,9 +163,9 @@ export const OptionSellingArtwork = forwardRef<SVGSVGElement, { data: OptionSell
     >
       <defs>
         <linearGradient id="os-bg" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#07080b" />
-          <stop offset="0.6" stopColor="#040506" />
-          <stop offset="1" stopColor="#050607" />
+          <stop offset="0" stopColor={T.bg[0]} />
+          <stop offset="0.6" stopColor={T.bg[1]} />
+          <stop offset="1" stopColor={T.bg[2]} />
         </linearGradient>
         <radialGradient id="os-r-gold">
           <stop offset="0" stopColor={GOLD} stopOpacity="0.1" />
@@ -226,8 +227,8 @@ export const OptionSellingArtwork = forwardRef<SVGSVGElement, { data: OptionSell
           <stop offset="1" stopColor="#ffd766" stopOpacity="0" />
         </linearGradient>
         <linearGradient id="os-table" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#0c0e12" stopOpacity=".92" />
-          <stop offset="1" stopColor="#060709" stopOpacity=".92" />
+          <stop offset="0" stopColor={T.table[0]} stopOpacity=".92" />
+          <stop offset="1" stopColor={T.table[1]} stopOpacity=".92" />
         </linearGradient>
         <linearGradient id="os-sell" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" stopColor="#f23a4d" />
@@ -262,11 +263,11 @@ export const OptionSellingArtwork = forwardRef<SVGSVGElement, { data: OptionSell
       </defs>
 
       {/* background */}
-      <rect width={IG_W} height={IG_H} fill="url(#os-bg)" />
+      <rect width={IG_W} height={H} fill="url(#os-bg)" />
       <ellipse cx={86} cy={54} rx={700} ry={420} fill="url(#os-r-gold)" />
       <ellipse cx={994} cy={405} rx={640} ry={520} fill="url(#os-r-green)" />
-      <ellipse cx={540} cy={1485} rx={900} ry={500} fill="url(#os-r-gold)" />
-      <g transform="translate(0 1050)" fill="none">
+      <ellipse cx={540} cy={H + 135} rx={900} ry={500} fill="url(#os-r-gold)" />
+      <g transform={`translate(0 ${H - 300})`} fill="none">
         <path d="M0 20 C180 90 330 190 520 300" stroke="url(#os-sw1)" strokeWidth="10" filter="url(#os-blur)" opacity=".7" />
         <path d="M0 20 C180 90 330 190 520 300" stroke="url(#os-sw1)" strokeWidth="3" />
         <path d="M0 110 C160 170 280 240 360 300" stroke="url(#os-sw1)" strokeWidth="2" opacity=".6" />
@@ -276,54 +277,62 @@ export const OptionSellingArtwork = forwardRef<SVGSVGElement, { data: OptionSell
       </g>
 
       {/* header */}
-      <image href={logo.href} x={66} y={66 + (104 - logoH) / 2} width={logoW} height={logoH} preserveAspectRatio="xMidYMid meet" />
-      {tag.length > 0 && (
-        <text x={IG_W - 66} y={110} textAnchor="end" {...t(19, 500, "#e8e8e8")} letterSpacing={4} xmlSpace="preserve">
-          {tag.map((s, i) => (
-            <tspan key={i}>
-              {i > 0 && (
-                <tspan fill={GOLD} letterSpacing={0}>
-                  {"   |   "}
+      {d.layout.showHeader && (
+        <g>
+          <image href={logo.href} x={66} y={66 + (104 - logoH) / 2} width={logoW} height={logoH} preserveAspectRatio="xMidYMid meet" />
+          {tag.length > 0 && (
+            <text x={IG_W - 66} y={110} textAnchor="end" {...t(19, 500, "#e8e8e8")} letterSpacing={4} xmlSpace="preserve">
+              {tag.map((s, i) => (
+                <tspan key={i}>
+                  {i > 0 && (
+                    <tspan fill={GOLD} letterSpacing={0}>
+                      {"   |   "}
+                    </tspan>
+                  )}
+                  {s}
                 </tspan>
-              )}
-              {s}
-            </tspan>
-          ))}
-        </text>
-      )}
-      <image href={`${ART}/art-candles.png`} x={681} y={150} width={373} height={200} />
-      <image href={`${ART}/art-bull.png`} x={738} y={352} width={342} height={228} />
-
-      {/* title */}
-      <text x={66} y={312} {...t(fitFont(d.title1, 940, 92, 48), 900, "url(#os-t1)")} letterSpacing={-2.5} filter="url(#os-t1-sh)">
-        {d.title1}
-      </text>
-      <text x={66} y={408} {...t(fitFont(d.title2, 960, 96, 48), 900, "url(#os-t2)")} letterSpacing={-2.5} filter="url(#os-t2-sh)">
-        {d.title2}
-      </text>
-
-      {/* brush badge */}
-      {badge && (
-        <g transform="rotate(-4.5 34 480)">
-          <g transform="translate(34 430)">
-            <path
-              fill="url(#os-badge)"
-              d="M44 22 C150 10 300 16 452 8 L470 14 L446 22 L494 24 L460 34 L482 40 L456 48 L478 56 L444 64 L470 72 L430 80 C310 88 190 84 70 92 L40 96 L62 86 L10 82 L48 74 L22 66 L52 58 L4 52 L50 44 L20 36 L54 30 Z"
-            />
-            <path d="M70 12 C200 6 320 8 440 2" stroke="#f5bd12" strokeWidth="3" strokeLinecap="round" opacity=".7" fill="none" />
-            <path d="M90 97 C220 99 330 94 420 90" stroke="#e0a800" strokeWidth="3" strokeLinecap="round" opacity=".6" fill="none" />
-            <path d="M462 44 L498 42 M456 62 L492 64 M20 60 L-4 62" stroke="#f5bd12" strokeWidth="2.5" strokeLinecap="round" opacity=".6" fill="none" />
-          </g>
-          <text x={96} y={480} dominantBaseline="central" {...t(fitFont(badge, 380, 50, 28), 900, "#15110a")} letterSpacing={-0.5}>
-            {badge}
-          </text>
+              ))}
+            </text>
+          )}
         </g>
       )}
+
+      {/* art, title and badge */}
+      <g transform={`translate(0 ${topDy})`}>
+        <image href={`${ART}/art-candles.png`} x={681} y={150} width={373} height={200} />
+        <image href={`${ART}/art-bull.png`} x={738} y={352} width={342} height={228} />
+
+        {/* title */}
+        <text x={66} y={312} {...t(fitFont(d.title1, 940, 92, 48), 900, "url(#os-t1)")} letterSpacing={-2.5} filter="url(#os-t1-sh)">
+          {d.title1}
+        </text>
+        <text x={66} y={408} {...t(fitFont(d.title2, 960, 96, 48), 900, "url(#os-t2)")} letterSpacing={-2.5} filter="url(#os-t2-sh)">
+          {d.title2}
+        </text>
+
+        {/* brush badge */}
+        {badge && (
+          <g transform="rotate(-4.5 34 480)">
+            <g transform="translate(34 430)">
+              <path
+                fill="url(#os-badge)"
+                d="M44 22 C150 10 300 16 452 8 L470 14 L446 22 L494 24 L460 34 L482 40 L456 48 L478 56 L444 64 L470 72 L430 80 C310 88 190 84 70 92 L40 96 L62 86 L10 82 L48 74 L22 66 L52 58 L4 52 L50 44 L20 36 L54 30 Z"
+              />
+              <path d="M70 12 C200 6 320 8 440 2" stroke="#f5bd12" strokeWidth="3" strokeLinecap="round" opacity=".7" fill="none" />
+              <path d="M90 97 C220 99 330 94 420 90" stroke="#e0a800" strokeWidth="3" strokeLinecap="round" opacity=".6" fill="none" />
+              <path d="M462 44 L498 42 M456 62 L492 64 M20 60 L-4 62" stroke="#f5bd12" strokeWidth="2.5" strokeLinecap="round" opacity=".6" fill="none" />
+            </g>
+            <text x={96} y={480} dominantBaseline="central" {...t(fitFont(badge, 380, 50, 28), 900, "#15110a")} letterSpacing={-0.5}>
+              {badge}
+            </text>
+          </g>
+        )}
+      </g>
 
       {/* info: date + instrument */}
       <g>
         <rect x={185} y={infoY} width={710} height={INFO_H} rx={16} fill="none" stroke={LINE_GOLD} strokeWidth={2} filter="url(#os-box-glow)" />
-        <rect x={185} y={infoY} width={710} height={INFO_H} rx={16} fill="#0a0a0a" fillOpacity={0.75} stroke={LINE_GOLD} strokeWidth={2} />
+        <rect x={185} y={infoY} width={710} height={INFO_H} rx={16} fill={T.box} fillOpacity={0.75} stroke={LINE_GOLD} strokeWidth={2} />
         <GlowLines x={185} y={infoY} width={710} h={INFO_H} />
         <Icon x={221} y={infoY + 23} size={60} vb={64}>
           {CAL}
@@ -402,13 +411,7 @@ export const OptionSellingArtwork = forwardRef<SVGSVGElement, { data: OptionSell
           <rect x={TX} y={pnlY} width={TW} height={PNL_H} rx={20} fill="url(#os-pnl)" stroke={neg ? "#e3243b" : "#2bd46e"} strokeWidth={2} />
           <Icon x={TX + 44} y={pnlY + 20} size={82} vb={82}>
             <circle cx="41" cy="41" r="38" stroke={neg ? "#ff4d5e" : "#2bd46e"} strokeWidth="3.5" />
-            <path
-              d={neg ? "M20 29l14 14 9-8 17 18" : "M20 53l14-14 9 8 17-18"}
-              stroke={neg ? "#ff4d5e" : "#2bd46e"}
-              strokeWidth="5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
+            <path d={neg ? "M20 29l14 14 9-8 17 18" : "M20 53l14-14 9 8 17-18"} stroke={neg ? "#ff4d5e" : "#2bd46e"} strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
             <path d={neg ? "M49 54h12V42" : "M49 28h12v12"} stroke={neg ? "#ff4d5e" : "#2bd46e"} strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
           </Icon>
           <text x={TX + 44 + 82 + 32} y={pnlY + PNL_H / 2 + 1} dominantBaseline="central" {...t(39, 700, "#f4f5f7")}>
@@ -427,23 +430,25 @@ export const OptionSellingArtwork = forwardRef<SVGSVGElement, { data: OptionSell
       )}
 
       {/* footer */}
-      <g>
-        {foot.map((s, i) => {
-          const x0 = fx;
-          fx += footW[i] + 78;
-          return (
-            <g key={i}>
-              {i > 0 && <rect x={x0 - 40} y={footY + 8} width={2} height={34} fill={GOLD} />}
-              <Icon x={x0} y={footY} size={50} vb={50}>
-                {FOOT_ICONS[i % 3]}
-              </Icon>
-              <text x={x0 + 72} y={footY + 26} dominantBaseline="central" {...t(18, 600, "#e8e8e8")} letterSpacing={3}>
-                {s}
-              </text>
-            </g>
-          );
-        })}
-      </g>
+      {d.layout.showFooter && (
+        <g>
+          {foot.map((s, i) => {
+            const x0 = fx;
+            fx += footW[i] + 78;
+            return (
+              <g key={i}>
+                {i > 0 && <rect x={x0 - 40} y={footY + 8} width={2} height={34} fill={GOLD} />}
+                <Icon x={x0} y={footY} size={50} vb={50}>
+                  {FOOT_ICONS[i % 3]}
+                </Icon>
+                <text x={x0 + 72} y={footY + 26} dominantBaseline="central" {...t(18, 600, "#e8e8e8")} letterSpacing={3}>
+                  {s}
+                </text>
+              </g>
+            );
+          })}
+        </g>
+      )}
     </svg>
   );
 });

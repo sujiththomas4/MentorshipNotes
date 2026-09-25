@@ -1,20 +1,29 @@
-import { forwardRef, useImperativeHandle, useRef } from "react";
+import { forwardRef, useImperativeHandle, useRef, type CSSProperties } from "react";
 import { BV_VARIANTS } from "@/branding/bethlehem-valley";
 import { BrandTitleView } from "../brand-title";
-import { BV_ART, BvIcon, Lines, useAutoFit, type FitResult } from "../shared";
+import { BV_ART, BvIcon, Lines, themeClass, useAutoFit, type BvTheme, type FitResult } from "../shared";
 import type { TipsListData } from "./data";
 import "./artwork.css";
 
 /*
  * Rebuild of bethlehem-valley_01_outlined.svg as HTML (so the Malayalam text stays editable
  * and wraps). Positions are the SVG's own; the drawn icons and leaf sprigs are its paths.
- * Colours are real values, not CSS variables: the PNG export does not resolve variables in SVG fills.
+ * Story (1080 × 1920) and a hidden header / footer only move and stretch whole zones; see
+ * layoutVars(). Colours inside SVG are real values per theme, not CSS variables: the PNG export
+ * does not resolve variables in SVG fills.
  */
 
-/** Icon colours: on the dark-green card circles, and on the white footer circles. */
+/** SVG colours per theme (the HTML parts use the CSS variables in artwork.css). */
+const INK: Record<BvTheme, { dark: string; mid: string; lime: string; pale: string; light: string; glow: string; streak: string }> = {
+  forest: { dark: "#07430C", mid: "#2F7D1F", lime: "#B8D83D", pale: "#E6F3B5", light: "#EAF6D6", glow: "#F6F7D9", streak: "#DCEFBF" },
+  harvest: { dark: "#4A2A17", mid: "#8A5A2B", lime: "#E9C35A", pale: "#F3E3B5", light: "#F6EEE2", glow: "#FAF3E6", streak: "#EADCC5" },
+};
+type Ink = (typeof INK)[BvTheme];
+
+/** Icon colours: on the dark card circles, and on the white footer circles. */
 type Tone = { line: string; a: string; b: string; bg: string; check: string; on: string };
-const DARK: Tone = { line: "#FFFFFF", a: "#B8D83D", b: "#E6F3B5", bg: "#07430C", check: "#2F7D1F", on: "#07430C" };
-const LIGHT: Tone = { line: "#07430C", a: "#2F7D1F", b: "#B8D83D", bg: "#FFFFFF", check: "#B8D83D", on: "#EAF6D6" };
+const darkTone = (k: Ink): Tone => ({ line: "#FFFFFF", a: k.lime, b: k.pale, bg: k.dark, check: k.mid, on: k.dark });
+const lightTone = (k: Ink): Tone => ({ line: k.dark, a: k.mid, b: k.lime, bg: "#FFFFFF", check: k.lime, on: k.light });
 
 /** The design's icons, drawn on a 190-unit grid. */
 const TIP_ICONS: Record<string, (t: Tone) => string> = {
@@ -55,7 +64,7 @@ function TipIcon({ name, tone, className }: { name: string; tone: Tone; classNam
 }
 
 /** The design's small leaf sprig (170 × 125 units). */
-function Sprig({ className, stem = "#07430C", a = "#2F7D1F", b = "#B8D83D" }: { className?: string; stem?: string; a?: string; b?: string }) {
+function Sprig({ className, stem, a, b }: { className?: string; stem: string; a: string; b: string }) {
   return (
     <svg className={className} viewBox="0 0 170 125" aria-hidden="true">
       <path d="M10 120C40 96 70 70 96 30" fill="none" stroke={stem} strokeWidth="6" strokeLinecap="round" />
@@ -65,21 +74,42 @@ function Sprig({ className, stem = "#07430C", a = "#2F7D1F", b = "#B8D83D" }: { 
   );
 }
 
+/**
+ * Zone shifts as CSS variables (px): --ty title block, --tt tips top, --th extra tips height,
+ * --cy callout, --fy footer band, --fb photo / figure bottom when the band is off. Story: the tips get 440 px taller and the footer goes to the
+ * bottom. A hidden header lets the title and tips start higher; a hidden footer gives the tips
+ * the band's room.
+ */
+function layoutVars(d: TipsListData): CSSProperties {
+  const story = d.format === "story";
+  const up = d.showHeader ? 0 : 130;
+  const ty = (story ? 50 : 0) - up;
+  const tt = (story ? 80 : 0) - up;
+  const th = (story ? 440 : 0) + up + (d.showFooter ? 0 : 150);
+  const cy = tt + th;
+  const fb = d.showFooter ? 0 : 138;
+  return { "--ty": `${ty}px`, "--tt": `${tt}px`, "--th": `${th}px`, "--cy": `${cy}px`, "--fy": `${story ? 570 : 0}px`, "--fb": `${fb}px` } as CSSProperties;
+}
+
 export const TipsListArtwork = forwardRef<HTMLDivElement, { data: TipsListData; onFit?: (r: FitResult) => void }>(function TipsListArtwork({ data: d, onFit }, ref) {
   const root = useRef<HTMLDivElement>(null);
   useImperativeHandle(ref, () => root.current!);
   useAutoFit(root, [d], 0.7, onFit);
   const logo = d.logo > 0 ? (BV_VARIANTS[Math.min(BV_VARIANTS.length, d.logo) - 1] ?? BV_VARIANTS[0]).web : `${BV_ART}/tips/logo.webp`;
   const fz = d.farmerZoom / 100;
+  const k = INK[d.theme] ?? INK.forest;
+  const sprig = { stem: k.dark, a: k.mid, b: k.lime };
 
   return (
-    <div ref={root} className="bvt canvas">
+    <div ref={root} className={`bvt canvas${d.format === "story" ? " story" : ""}${themeClass(d.theme)}`} style={layoutVars(d)}>
       {/* background shapes */}
       <svg className="deco" viewBox="0 0 1080 1350" aria-hidden="true">
-        <path d="M620 0H1080V120C930 180 780 50 620 0Z" fill="#EAF6D6" />
-        <path d="M0 1230C190 1160 300 1290 460 1350H0Z" fill="#EAF6D6" />
-        <circle cx="925" cy="560" r="250" fill="#F6F7D9" opacity=".8" />
-        <path d="M1080 0C1010 100 1000 170 940 250" fill="none" stroke="#DCEFBF" strokeWidth="18" strokeLinecap="round" />
+        <path d="M620 0H1080V120C930 180 780 50 620 0Z" fill={k.light} />
+        <circle cx="925" cy="560" r="250" fill={k.glow} opacity=".8" />
+        <path d="M1080 0C1010 100 1000 170 940 250" fill="none" stroke={k.streak} strokeWidth="18" strokeLinecap="round" />
+      </svg>
+      <svg className="deco deco-foot" viewBox="0 0 1080 1350" aria-hidden="true">
+        <path d="M0 1230C190 1160 300 1290 460 1350H0Z" fill={k.light} />
       </svg>
       {d.background && (
         <div className="bgphoto">
@@ -93,38 +123,46 @@ export const TipsListArtwork = forwardRef<HTMLDivElement, { data: TipsListData; 
       )}
 
       {/* header */}
-      <div className="logo">
-        <img src={logo} alt="Bethlehem Valley" />
+      {d.showHeader && (
+        <>
+          <div className="logo">
+            <img src={logo} alt="Bethlehem Valley" />
+          </div>
+          <BrandTitleView t={d.brandTitle} box={{ left: 200, top: 36, width: 370, height: 116 }} />
+        </>
+      )}
+
+      {/* number, title, subtitle, divider */}
+      <div className="zone ztitle">
+        <div className="num">
+          <span>{d.number}</span>
+        </div>
+        <div className="t1 bname ml" lang="ml">
+          {d.title1}
+          <Sprig className="tsprig" {...sprig} />
+        </div>
+        <div className="t2 bname ml" lang="ml">
+          {d.title2}
+        </div>
+        <div className="sub ml" lang="ml">
+          <div>{d.sub1}</div>
+          <div>{d.sub2}</div>
+        </div>
+        <svg className="divider" viewBox="0 0 600 34" aria-hidden="true">
+          <line x1="0" y1="17" x2="230" y2="17" stroke={k.mid} strokeWidth="4" />
+          <circle cx="278" cy="17" r="7" fill={k.mid} />
+          <circle cx="300" cy="17" r="7" fill={k.mid} />
+          <circle cx="322" cy="17" r="7" fill={k.mid} />
+          <line x1="370" y1="17" x2="600" y2="17" stroke={k.mid} strokeWidth="4" />
+        </svg>
       </div>
-      <BrandTitleView t={d.brandTitle} box={{ left: 200, top: 36, width: 370, height: 116 }} />
-      <div className="num">
-        <span>{d.number}</span>
-      </div>
-      <div className="t1 bname ml" lang="ml">
-        {d.title1}
-        <Sprig className="tsprig" />
-      </div>
-      <div className="t2 bname ml" lang="ml">
-        {d.title2}
-      </div>
-      <div className="sub ml" lang="ml">
-        <div>{d.sub1}</div>
-        <div>{d.sub2}</div>
-      </div>
-      <svg className="divider" viewBox="0 0 600 34" aria-hidden="true">
-        <line x1="0" y1="17" x2="230" y2="17" stroke="#2F7D1F" strokeWidth="4" />
-        <circle cx="278" cy="17" r="7" fill="#2F7D1F" />
-        <circle cx="300" cy="17" r="7" fill="#2F7D1F" />
-        <circle cx="322" cy="17" r="7" fill="#2F7D1F" />
-        <line x1="370" y1="17" x2="600" y2="17" stroke="#2F7D1F" strokeWidth="4" />
-      </svg>
 
       {/* tip cards */}
       <div className="copy tips">
         {d.tips.map((t, i) => (
           <div key={i} className="card">
             <div className="cic">
-              <TipIcon name={t.icon} tone={DARK} className="ico" />
+              <TipIcon name={t.icon} tone={darkTone(k)} className="ico" />
             </div>
             <div className="ctext ml" lang="ml">
               <div className="ct">{t.title}</div>
@@ -143,10 +181,10 @@ export const TipsListArtwork = forwardRef<HTMLDivElement, { data: TipsListData; 
       <div className="callout">
         <div className="bulb">
           <svg viewBox="0 0 190 190" aria-hidden="true">
-            <g fill="none" stroke="#07430C" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round">
+            <g fill="none" stroke={k.dark} strokeWidth="7" strokeLinecap="round" strokeLinejoin="round">
               <path d="M70 122H120" />
               <path d="M78 140H112" />
-              <path d="M80 104C63 94 55 79 58 61C61 40 78 25 98 25C121 25 138 42 140 64C141 82 132 96 116 105C111 108 109 113 109 118H75C75 112 73 108 68 104Z" fill="#EAF6D6" />
+              <path d="M80 104C63 94 55 79 58 61C61 40 78 25 98 25C121 25 138 42 140 64C141 82 132 96 116 105C111 108 109 113 109 118H75C75 112 73 108 68 104Z" fill={k.light} />
               <path d="M98 6V0M42 25L36 19M154 25L160 19M29 63H20M176 63H167" />
             </g>
           </svg>
@@ -155,37 +193,41 @@ export const TipsListArtwork = forwardRef<HTMLDivElement, { data: TipsListData; 
           <div>{d.callout1}</div>
           <div className="g">{d.callout2}</div>
         </div>
-        <Sprig className="csprig" />
+        <Sprig className="csprig" {...sprig} />
       </div>
 
       {/* footer band */}
-      <footer className="band">
-        <div className="benefits">
-          {d.benefits.slice(0, 4).map((b, i) => (
-            <div key={i} className="ben">
-              <div className="bic">
-                <TipIcon name={b.icon} tone={LIGHT} className="ico" />
-              </div>
-              <div className="bl ml" lang="ml">
-                {b.label}
-              </div>
+      {d.showFooter && (
+        <>
+          <footer className="band">
+            <div className="benefits">
+              {d.benefits.slice(0, 4).map((b, i) => (
+                <div key={i} className="ben">
+                  <div className="bic">
+                    <TipIcon name={b.icon} tone={lightTone(k)} className="ico" />
+                  </div>
+                  <div className="bl ml" lang="ml">
+                    {b.label}
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-        {d.url && (
-          <div className="url">
-            <Sprig className="usprig" stem="#B8D83D" a="#B8D83D" b="#FFFFFF" />
-            <span>{d.url}</span>
-            <Sprig className="usprig r" stem="#B8D83D" a="#B8D83D" b="#FFFFFF" />
-          </div>
-        )}
-      </footer>
-      <svg className="branch" viewBox="0 0 150 125" aria-hidden="true">
-        <path d="M12 122C58 108 105 68 148 9" fill="none" stroke="#07430C" strokeWidth="5" strokeLinecap="round" />
-        <path d="M43 99C18 90 10 68 16 47C42 49 61 63 62 83C58 91 51 97 43 99Z" fill="#2F7D1F" />
-        <path d="M73 74C50 61 48 39 57 20C80 24 95 38 93 58C88 66 82 71 73 74Z" fill="#B8D83D" />
-        <path d="M106 49C88 32 91 13 105 0C126 8 137 23 131 40C123 47 115 50 106 49Z" fill="#2F7D1F" />
-      </svg>
+            {d.url && (
+              <div className="url">
+                <Sprig className="usprig" stem={k.lime} a={k.lime} b="#FFFFFF" />
+                <span>{d.url}</span>
+                <Sprig className="usprig r" stem={k.lime} a={k.lime} b="#FFFFFF" />
+              </div>
+            )}
+          </footer>
+          <svg className="branch" viewBox="0 0 150 125" aria-hidden="true">
+            <path d="M12 122C58 108 105 68 148 9" fill="none" stroke={k.dark} strokeWidth="5" strokeLinecap="round" />
+            <path d="M43 99C18 90 10 68 16 47C42 49 61 63 62 83C58 91 51 97 43 99Z" fill={k.mid} />
+            <path d="M73 74C50 61 48 39 57 20C80 24 95 38 93 58C88 66 82 71 73 74Z" fill={k.lime} />
+            <path d="M106 49C88 32 91 13 105 0C126 8 137 23 131 40C123 47 115 50 106 49Z" fill={k.mid} />
+          </svg>
+        </>
+      )}
     </div>
   );
 });

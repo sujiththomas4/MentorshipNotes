@@ -1,5 +1,6 @@
 import { forwardRef, type ReactNode } from "react";
-import { IG, IG_H, IG_LOGOS, IG_W, fitFont, wrapText } from "@/social/instagram/kit";
+import { IG, IG_LOGOS, IG_W, fitFont, wrapText } from "@/social/instagram/kit";
+import { igSpread } from "@/social/instagram/layout";
 import { chartPlacement, inr, num, type SwingTradeData } from "./data";
 
 /*
@@ -8,7 +9,8 @@ import { chartPlacement, inr, num, type SwingTradeData } from "./data";
  * white on transparent, so it must sit on dark navy, never be recoloured.
  */
 
-const C = {
+/** Colour themes. `navy` = accents on the page (banner, icons), `strong` = headline / value text. */
+export const LIGHT = {
   navy: "#12355B",
   navyDark: "#0B223D",
   emerald: "#0AA66A",
@@ -16,10 +18,65 @@ const C = {
   border: "#D9E1E8",
   label: "#33506f",
   body: "#1d3350",
+  strong: "#0B223D",
+  icon: "#12355B",
+  banner: "#12355B",
+  bgTop: "#fbfcfd",
+  bgBot: "#f6f9fb",
+  glow: "#eef4f9",
+  card: "#ffffff",
+  pill: "#eaf0f5",
+  pillText: "#12355B",
+  risk: "#e6f6ef",
+  deco1: "#d6e3ec",
+  deco2: "#bfe8d4",
+  chartBg: "#ffffff",
+  gridV: "#f1f4f7",
+  gridH: "#eef2f6",
+  axis: "#e3e9ef",
+  axisText: "#51627a",
+  monthText: "#33475f",
+  chartText: "#14253D",
+  muted: "#8a99ab",
 };
-const SCRIPT_FONT = "'Lobster Two', cursive";
+export type Palette = typeof LIGHT;
+const DARK: Palette = {
+  ...LIGHT,
+  border: "#26435f",
+  label: "#9fb6cc",
+  body: "#d9e4ee",
+  strong: "#ffffff",
+  icon: "#8cb8ea",
+  banner: "#1d5fae",
+  bgTop: "#0e2239",
+  bgBot: "#071523",
+  glow: "#17365a",
+  card: "#10263d",
+  pill: "#16304c",
+  pillText: "#e6eef6",
+  risk: "#0f3a2c",
+  deco1: "#23405e",
+  deco2: "#1d5a44",
+  chartBg: "#0c1d31",
+  gridV: "#132b44",
+  gridH: "#132b44",
+  axis: "#23405e",
+  axisText: "#9fb6cc",
+  monthText: "#b8c8d8",
+  chartText: "#e6eef6",
+  muted: "#7f93a8",
+};
+export const PALETTES: Record<string, Palette> = { light: LIGHT, navy: DARK };
 
-function formatDate(iso: string) {
+/** Section shifts for the chosen format (the editor uses `chartDy` for dragging the chart). */
+export function swingLayout(d: SwingTradeData) {
+  // header above 140; body: title | info row | chart | direction + levels | bottom card; footer from 1270
+  const sp = igSpread(d.layout, 140, 1270, [380, 488, 996, 1125]);
+  return { ...sp, chartDy: sp.dy(2) };
+}
+export const SCRIPT_FONT = "'Lobster Two', cursive";
+
+export function formatDate(iso: string) {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
   if (!m) return iso || "—";
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -28,9 +85,9 @@ function formatDate(iso: string) {
 
 /* ---------------- icons (64 × 64, from the HTML) ---------------- */
 
-type IconName = "calendar" | "chart" | "tag" | "price" | "entry" | "target" | "stop" | "bulb" | "risk";
+export type IconName = "calendar" | "chart" | "tag" | "price" | "entry" | "target" | "stop" | "bulb" | "risk";
 
-function Icon({ name, x, y, size, color }: { name: IconName; x: number; y: number; size: number; color: string }) {
+export function Icon({ name, x, y, size, color }: { name: IconName; x: number; y: number; size: number; color: string }) {
   const s = { stroke: color, fill: "none", strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
   const body: Record<IconName, ReactNode> = {
     calendar: (
@@ -125,7 +182,7 @@ const TF: Record<string, string> = { daily: "1D", weekly: "1W", monthly: "1M", h
 const W = 1001;
 const H = 484;
 
-function IllustrativeChart({ d, tag }: { d: SwingTradeData; tag: boolean }) {
+function IllustrativeChart({ d, tag, C }: { d: SwingTradeData; tag: boolean; C: Palette }) {
   const buy = d.direction !== "SELL";
   const e = num(d.entryPrice);
   const t1 = num(d.target1);
@@ -136,11 +193,11 @@ function IllustrativeChart({ d, tag }: { d: SwingTradeData; tag: boolean }) {
   if (![e, t1, t2, sl].every(Number.isFinite) || e <= 0) {
     return (
       <g>
-        <rect width={W} height={H} fill="#fff" />
-        <text x={W / 2} y={H / 2 - 12} textAnchor="middle" fill="#8a99ab" fontFamily={IG.font} fontSize={24} fontWeight={600}>
+        <rect width={W} height={H} fill={C.chartBg} />
+        <text x={W / 2} y={H / 2 - 12} textAnchor="middle" fill={C.muted} fontFamily={IG.font} fontSize={24} fontWeight={600}>
           Enter entry, targets and stop loss
         </text>
-        <text x={W / 2} y={H / 2 + 22} textAnchor="middle" fill="#8a99ab" fontFamily={IG.font} fontSize={20} fontWeight={500}>
+        <text x={W / 2} y={H / 2 + 22} textAnchor="middle" fill={C.muted} fontFamily={IG.font} fontSize={20} fontWeight={500}>
           or upload your chart image
         </text>
       </g>
@@ -202,9 +259,7 @@ function IllustrativeChart({ d, tag }: { d: SwingTradeData; tag: boolean }) {
     if (cur.getDay() % 6) days.unshift(new Date(cur));
     cur.setDate(cur.getDate() - 1);
   }
-  const months = days
-    .map((dd, i) => ({ dd, i }))
-    .filter(({ dd, i }) => i > 3 && dd.getMonth() !== days[i - 1].getMonth());
+  const months = days.map((dd, i) => ({ dd, i })).filter(({ dd, i }) => i > 3 && dd.getMonth() !== days[i - 1].getMonth());
 
   // trendline through swing lows (BUY) / highs (SELL)
   const pick = buy ? (k: (typeof K)[number]) => k.lo : (k: (typeof K)[number]) => k.hi;
@@ -241,23 +296,23 @@ function IllustrativeChart({ d, tag }: { d: SwingTradeData; tag: boolean }) {
     <g>
       <defs>
         <marker id="st-ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto">
-          <path d="M0 0L10 5L0 10z" fill="#14253D" />
+          <path d="M0 0L10 5L0 10z" fill={C.chartText} />
         </marker>
       </defs>
-      <rect width={W} height={H} fill="#fff" />
+      <rect width={W} height={H} fill={C.chartBg} />
       {months.map(({ i }) => (
-        <line key={`vg${i}`} x1={x(i)} x2={x(i)} y1={top - 10} y2={bot} stroke="#f1f4f7" />
+        <line key={`vg${i}`} x1={x(i)} x2={x(i)} y1={top - 10} y2={bot} stroke={C.gridV} />
       ))}
       {ticks.map((p) => (
         <g key={p}>
-          <line x1={0} x2={plotR} y1={y(p)} y2={y(p)} stroke="#eef2f6" />
-          <text x={axisX + 10} y={y(p) + 5} {...f(14, 500, "#51627a")}>
+          <line x1={0} x2={plotR} y1={y(p)} y2={y(p)} stroke={C.gridH} />
+          <text x={axisX + 10} y={y(p) + 5} {...f(14, 500, C.axisText)}>
             {Math.round(p).toLocaleString("en-IN")}
           </text>
         </g>
       ))}
-      <line x1={plotR} x2={plotR} y1={0} y2={H} stroke="#e3e9ef" />
-      <line x1={0} x2={W} y1={bot + 4} y2={bot + 4} stroke="#e3e9ef" />
+      <line x1={plotR} x2={plotR} y1={0} y2={H} stroke={C.axis} />
+      <line x1={0} x2={W} y1={bot + 4} y2={bot + 4} stroke={C.axis} />
       {/* reward / risk zones */}
       <rect x={lastX} y={Math.min(y(e), y(t2))} width={tagX - lastX - 6} height={Math.abs(y(t2) - y(e))} fill={C.emerald} opacity={0.12} />
       <rect x={lastX} y={Math.min(y(e), y(sl))} width={tagX - lastX - 6} height={Math.abs(y(sl) - y(e))} fill={C.red} opacity={0.12} />
@@ -268,12 +323,12 @@ function IllustrativeChart({ d, tag }: { d: SwingTradeData; tag: boolean }) {
       {breakout && (
         <g>
           <rect x={x(N - 36)} y={zoneY - bandH / 2} width={x(N - 1) - x(N - 36) + 20} height={bandH} fill="#9cc2ec" opacity={0.45} stroke="#6a9fd8" />
-          <text x={x(N - 36) + 40} y={buy ? zoneY - 58 : zoneY + 70} {...f(16, 600, "#14253D")}>
+          <text x={x(N - 36) + 40} y={buy ? zoneY - 58 : zoneY + 70} {...f(16, 600, C.chartText)}>
             {buy ? "Resistance Breakout" : "Support Breakdown"}
           </text>
           <path
             d={`M${x(N - 36) + 205} ${buy ? zoneY - 50 : zoneY + 62} L${x(N - 9)} ${buy ? zoneY - 10 : zoneY + 10}`}
-            stroke="#14253D"
+            stroke={C.chartText}
             strokeWidth={1.6}
             markerEnd="url(#st-ah)"
           />
@@ -306,15 +361,15 @@ function IllustrativeChart({ d, tag }: { d: SwingTradeData; tag: boolean }) {
         </g>
       ))}
       {months.map(({ dd, i }) => (
-        <text key={`m${i}`} x={x(i) + 14} y={H - 18} {...f(15, 600, "#33475f")}>
+        <text key={`m${i}`} x={x(i) + 14} y={H - 18} {...f(15, 600, C.monthText)}>
           {dd.toLocaleString("en", { month: "short" })}
         </text>
       ))}
-      <text x={14} y={22} {...f(14.5, 600, "#14253D")} letterSpacing={0.2}>
+      <text x={14} y={22} {...f(14.5, 600, C.chartText)} letterSpacing={0.2}>
         {`${d.stockName || d.ticker || "—"} · ${tf} · ${d.exchange || "NSE"}`}
       </text>
       {tag && (
-        <text x={W - 12} y={22} textAnchor="end" {...f(13, 600, "#8a99ab")} fontStyle="italic">
+        <text x={W - 12} y={22} textAnchor="end" {...f(13, 600, C.muted)} fontStyle="italic">
           Illustrative chart
         </text>
       )}
@@ -324,10 +379,10 @@ function IllustrativeChart({ d, tag }: { d: SwingTradeData; tag: boolean }) {
 
 /* ---------------- post ---------------- */
 
-export const SwingTradeArtwork = forwardRef<SVGSVGElement, { data: SwingTradeData; className?: string }>(function SwingTradeArtwork(
-  { data: d, className },
-  ref,
-) {
+export const SwingTradeArtwork = forwardRef<SVGSVGElement, { data: SwingTradeData; className?: string }>(function SwingTradeArtwork({ data: d, className }, ref) {
+  const C = PALETTES[d.layout.theme] ?? LIGHT;
+  const L = swingLayout(d);
+  const at = (i: number) => `translate(0 ${L.dy(i)})`;
   const buy = d.direction !== "SELL";
   const cp = chartPlacement(d);
   const t = (size: number, weight: number, fill: string) => ({ fontFamily: IG.font, fontSize: size, fontWeight: weight, fill });
@@ -354,9 +409,9 @@ export const SwingTradeArtwork = forwardRef<SVGSVGElement, { data: SwingTradeDat
     { w: 282, icon: "price" as const, label: "CURRENT PRICE", value: inr(d.currentPrice) },
   ];
   const levels = [
-    { icon: "entry" as const, label: "ENTRY PRICE", value: inr(d.entryPrice), ic: C.navy, vc: C.navyDark },
-    { icon: "target" as const, label: "TARGET 1", value: inr(d.target1), ic: C.emerald, vc: C.navyDark },
-    { icon: "target" as const, label: "TARGET 2", value: inr(d.target2), ic: C.emerald, vc: C.navyDark },
+    { icon: "entry" as const, label: "ENTRY PRICE", value: inr(d.entryPrice), ic: C.icon, vc: C.strong },
+    { icon: "target" as const, label: "TARGET 1", value: inr(d.target1), ic: C.emerald, vc: C.strong },
+    { icon: "target" as const, label: "TARGET 2", value: inr(d.target2), ic: C.emerald, vc: C.strong },
     { icon: "stop" as const, label: "STOP LOSS", value: inr(d.stopLoss), ic: C.red, vc: C.red },
   ];
 
@@ -383,9 +438,9 @@ export const SwingTradeArtwork = forwardRef<SVGSVGElement, { data: SwingTradeDat
   return (
     <svg
       ref={ref}
-      viewBox={`0 0 ${IG_W} ${IG_H}`}
+      viewBox={`0 0 ${IG_W} ${L.H}`}
       width={IG_W}
-      height={IG_H}
+      height={L.H}
       xmlns="http://www.w3.org/2000/svg"
       className={className}
       role="img"
@@ -393,12 +448,12 @@ export const SwingTradeArtwork = forwardRef<SVGSVGElement, { data: SwingTradeDat
     >
       <defs>
         <linearGradient id="st-bg" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#fbfcfd" />
-          <stop offset="1" stopColor="#f6f9fb" />
+          <stop offset="0" stopColor={C.bgTop} />
+          <stop offset="1" stopColor={C.bgBot} />
         </linearGradient>
         <radialGradient id="st-glow" gradientUnits="userSpaceOnUse" cx={918} cy={0} r={900} gradientTransform="translate(918 0) scale(1 0.5556) translate(-918 0)">
-          <stop offset="0" stopColor="#eef4f9" />
-          <stop offset="0.7" stopColor="#eef4f9" stopOpacity="0" />
+          <stop offset="0" stopColor={C.glow} />
+          <stop offset="0.7" stopColor={C.glow} stopOpacity="0" />
         </radialGradient>
         <linearGradient id="st-title" gradientUnits="userSpaceOnUse" x1={420} x2={900} y1={0} y2={0}>
           <stop offset="0" stopColor="#0aa66a" />
@@ -429,167 +484,184 @@ export const SwingTradeArtwork = forwardRef<SVGSVGElement, { data: SwingTradeDat
         </filter>
       </defs>
 
-      <rect width={IG_W} height={IG_H} fill="url(#st-bg)" />
-      <rect width={IG_W} height={IG_H} fill="url(#st-glow)" />
+      <rect width={IG_W} height={L.H} fill="url(#st-bg)" />
+      <rect width={IG_W} height={L.H} fill="url(#st-glow)" />
 
       {/* header */}
-      {d.logoBg === "plate" && <rect x={40} y={26} width={plateW} height={plateH} rx={18} fill={C.navyDark} />}
-      <image href={d.logoBg === "shield" ? logo.filledHref : logo.href} x={40 + pad} y={26 + pad} width={logoW} height={logoH} preserveAspectRatio="xMidYMid meet" />
-      <rect x={pillX} y={30} width={pillW} height={56} rx={14} fill="#eaf0f5" />
-      <Icon name="calendar" x={pillX + 20} y={42} size={32} color={C.emerald} />
-      <text x={pillX + 66} y={59} dominantBaseline="central" {...t(25, 600, C.navy)}>
-        {date}
-      </text>
-
-      {/* title + script */}
-      <text x={42} y={250} {...t(titleSize, 900, C.navyDark)} letterSpacing={-3.5}>
-        <tspan>{d.titleA}</tspan>
-        <tspan fill="url(#st-title)"> {d.titleB}</tspan>
-      </text>
-      <g transform="rotate(-13 975 250)">
-        {d.script.map((s, i) => (
-          <text key={i} x={900 + [0, -6, 12][i]} y={220 + i * 44.3} fontFamily={SCRIPT_FONT} fontStyle="italic" fontWeight={700} fontSize={41} fill={C.navyDark}>
-            {s}
+      {d.layout.showHeader && (
+        <g>
+          {d.logoBg === "plate" && <rect x={40} y={26} width={plateW} height={plateH} rx={18} fill={C.navyDark} />}
+          <image href={d.logoBg === "shield" ? logo.filledHref : logo.href} x={40 + pad} y={26 + pad} width={logoW} height={logoH} preserveAspectRatio="xMidYMid meet" />
+          <rect x={pillX} y={30} width={pillW} height={56} rx={14} fill={C.pill} />
+          <Icon name="calendar" x={pillX + 20} y={42} size={32} color={C.emerald} />
+          <text x={pillX + 66} y={59} dominantBaseline="central" {...t(25, 600, C.pillText)}>
+            {date}
           </text>
-        ))}
-      </g>
-      <path d="M918 352C954 340 992 330 1038 322" stroke={C.emerald} strokeWidth={5} strokeLinecap="round" fill="none" />
+        </g>
+      )}
 
-      {/* TRADE SETUP brush banner */}
-      <g transform="translate(30 266)">
-        <path
-          fill={C.navy}
-          d="M26 14 C120 6 240 12 360 8 C450 5 540 10 612 6 L606 20 L626 24 L604 34 L618 44 L600 52 L622 62 L598 70 L612 82 L590 90 C470 98 350 92 240 97 C150 100 70 96 16 100 L28 90 L8 84 L24 74 L4 66 L22 56 L10 46 L24 38 L6 30 L22 22 Z"
-        />
-        <path d="M40 8 C200 2 420 6 590 2" stroke={C.navy} strokeWidth={4} strokeLinecap="round" opacity={0.7} fill="none" />
-        <path d="M36 101 C200 104 420 98 572 96" stroke={C.navy} strokeWidth={3} strokeLinecap="round" opacity={0.6} fill="none" />
-        <path d="M600 30 L636 28 M596 60 L632 58 M594 80 L620 82" stroke={C.navy} strokeWidth={2.5} strokeLinecap="round" opacity={0.55} fill="none" />
-      </g>
-      <text x={84} y={328} {...t(55, 900, "#fff")} letterSpacing={-0.5}>
-        TRADE SETUP
-      </text>
-      <g transform="translate(500 292)" fill="#fff">
-        <rect x={0} y={24} width={10} height={16} rx={1.5} />
-        <rect x={16} y={13} width={10} height={27} rx={1.5} />
-        <rect x={32} y={0} width={10} height={40} rx={1.5} />
+      {/* title + script + banner */}
+      <g transform={at(0)}>
+        <text x={42} y={250} {...t(titleSize, 900, C.strong)} letterSpacing={-3.5}>
+          <tspan>{d.titleA}</tspan>
+          <tspan fill="url(#st-title)"> {d.titleB}</tspan>
+        </text>
+        <g transform="rotate(-13 975 250)">
+          {d.script.map((s, i) => (
+            <text key={i} x={900 + [0, -6, 12][i]} y={220 + i * 44.3} fontFamily={SCRIPT_FONT} fontStyle="italic" fontWeight={700} fontSize={41} fill={C.strong}>
+              {s}
+            </text>
+          ))}
+        </g>
+        <path d="M918 352C954 340 992 330 1038 322" stroke={C.emerald} strokeWidth={5} strokeLinecap="round" fill="none" />
+
+        {/* TRADE SETUP brush banner */}
+        <g transform="translate(30 266)">
+          <path
+            fill={C.banner}
+            d="M26 14 C120 6 240 12 360 8 C450 5 540 10 612 6 L606 20 L626 24 L604 34 L618 44 L600 52 L622 62 L598 70 L612 82 L590 90 C470 98 350 92 240 97 C150 100 70 96 16 100 L28 90 L8 84 L24 74 L4 66 L22 56 L10 46 L24 38 L6 30 L22 22 Z"
+          />
+          <path d="M40 8 C200 2 420 6 590 2" stroke={C.banner} strokeWidth={4} strokeLinecap="round" opacity={0.7} fill="none" />
+          <path d="M36 101 C200 104 420 98 572 96" stroke={C.banner} strokeWidth={3} strokeLinecap="round" opacity={0.6} fill="none" />
+          <path d="M600 30 L636 28 M596 60 L632 58 M594 80 L620 82" stroke={C.banner} strokeWidth={2.5} strokeLinecap="round" opacity={0.55} fill="none" />
+        </g>
+        <text x={84} y={328} {...t(55, 900, "#fff")} letterSpacing={-0.5}>
+          TRADE SETUP
+        </text>
+        <g transform="translate(500 292)" fill="#fff">
+          <rect x={0} y={24} width={10} height={16} rx={1.5} />
+          <rect x={16} y={13} width={10} height={27} rx={1.5} />
+          <rect x={32} y={0} width={10} height={40} rx={1.5} />
+        </g>
       </g>
 
       {/* info row */}
-      <rect x={40} y={386} width={1001} height={92} rx={16} fill="#fff" stroke={C.border} strokeWidth={1.5} />
-      {infoCells.map((c, i) => (
-        <g key={c.label}>
-          {i > 0 && <line x1={c.x0} x2={c.x0} y1={406} y2={458} stroke={C.border} strokeWidth={1.5} />}
-          <Icon name={c.icon} x={c.x0 + 26} y={411} size={42} color={C.navy} />
-          <text x={c.x0 + 86} y={419} {...t(16.5, 600, C.label)} letterSpacing={0.4}>
-            {c.label}
-          </text>
-          <text x={c.x0 + 86} y={452} {...t(fitFont(c.value, c.w - 86 - 22, 27, 16), 800, C.navyDark)}>
-            {c.value}
-          </text>
-        </g>
-      ))}
+      <g transform={at(1)}>
+        <rect x={40} y={386} width={1001} height={92} rx={16} fill={C.card} stroke={C.border} strokeWidth={1.5} />
+        {infoCells.map((c, i) => (
+          <g key={c.label}>
+            {i > 0 && <line x1={c.x0} x2={c.x0} y1={406} y2={458} stroke={C.border} strokeWidth={1.5} />}
+            <Icon name={c.icon} x={c.x0 + 26} y={411} size={42} color={C.icon} />
+            <text x={c.x0 + 86} y={419} {...t(16.5, 600, C.label)} letterSpacing={0.4}>
+              {c.label}
+            </text>
+            <text x={c.x0 + 86} y={452} {...t(fitFont(c.value, c.w - 86 - 22, 27, 16), 800, C.strong)}>
+              {c.value}
+            </text>
+          </g>
+        ))}
+      </g>
 
       {/* chart */}
-      <g clipPath="url(#st-chart-clip)">
-        {d.chart ? (
-          <g>
-            <rect x={40} y={497} width={1001} height={484} fill="#fff" />
-            <image href={d.chart} x={cp.x} y={cp.y} width={cp.w} height={cp.h} preserveAspectRatio="none" />
-          </g>
-        ) : (
-          <svg x={40} y={497} width={W} height={H} viewBox={`0 0 ${W} ${H}`}>
-            <IllustrativeChart d={d} tag={d.illustrativeTag} />
-          </svg>
-        )}
+      <g transform={at(2)}>
+        <g clipPath="url(#st-chart-clip)">
+          {d.chart ? (
+            <g>
+              <rect x={40} y={497} width={1001} height={484} fill={C.chartBg} />
+              <image href={d.chart} x={cp.x} y={cp.y} width={cp.w} height={cp.h} preserveAspectRatio="none" />
+            </g>
+          ) : (
+            <svg x={40} y={497} width={W} height={H} viewBox={`0 0 ${W} ${H}`}>
+              <IllustrativeChart d={d} tag={d.illustrativeTag} C={C} />
+            </svg>
+          )}
+        </g>
+        <rect x={40} y={497} width={1001} height={484} rx={17} fill="none" stroke={C.border} strokeWidth={1.5} />
       </g>
-      <rect x={40} y={497} width={1001} height={484} rx={17} fill="none" stroke={C.border} strokeWidth={1.5} />
 
-      {/* direction */}
-      <rect x={40} y={1012} width={258} height={106} rx={14} fill={buy ? "url(#st-buy)" : "url(#st-sell)"} filter="url(#st-shadow)" />
-      <circle cx={93} cy={1065} r={33} fill="#fff" fillOpacity={0.18} />
-      <svg x={73} y={1045} width={40} height={40} viewBox="0 0 64 64">
-        <path d={buy ? "M32 54V12M14 30l18-18 18 18" : "M32 10v42M14 34l18 18 18-18"} stroke="#fff" strokeWidth={7} strokeLinecap="round" strokeLinejoin="round" fill="none" />
-      </svg>
-      <text x={144} y={1047} {...t(14, 600, "#fff")} letterSpacing={0.3} opacity={0.95}>
-        TRADE DIRECTION
-      </text>
-      <text x={144} y={1091} {...t(41, 900, "#fff")}>
-        {buy ? "BUY" : "SELL"}
-      </text>
+      {/* direction + levels */}
+      <g transform={at(3)}>
+        <rect x={40} y={1012} width={258} height={106} rx={14} fill={buy ? "url(#st-buy)" : "url(#st-sell)"} filter="url(#st-shadow)" />
+        <circle cx={93} cy={1065} r={33} fill="#fff" fillOpacity={0.18} />
+        <svg x={73} y={1045} width={40} height={40} viewBox="0 0 64 64">
+          <path d={buy ? "M32 54V12M14 30l18-18 18 18" : "M32 10v42M14 34l18 18 18-18"} stroke="#fff" strokeWidth={7} strokeLinecap="round" strokeLinejoin="round" fill="none" />
+        </svg>
+        <text x={144} y={1047} {...t(14, 600, "#fff")} letterSpacing={0.3} opacity={0.95}>
+          TRADE DIRECTION
+        </text>
+        <text x={144} y={1091} {...t(41, 900, "#fff")}>
+          {buy ? "BUY" : "SELL"}
+        </text>
 
-      {/* levels */}
-      <rect x={312} y={1012} width={729} height={106} rx={16} fill="#fff" stroke={C.border} strokeWidth={1.5} />
-      {levels.map((l, i) => {
-        const x0 = 312 + i * 182.25;
-        return (
-          <g key={l.label}>
-            {i > 0 && <line x1={x0} x2={x0} y1={1033} y2={1097} stroke={C.border} strokeWidth={1.5} />}
-            <Icon name={l.icon} x={x0 + 22} y={1033} size={34} color={l.ic} />
-            <text x={x0 + 70} y={1047} {...t(15, 600, C.label)} letterSpacing={0.4}>
-              {l.label}
-            </text>
-            <text x={x0 + 70} y={1086} {...t(fitFont(l.value, 182.25 - 70 - 12, 30, 18), 800, l.vc)}>
-              {l.value}
-            </text>
-          </g>
-        );
-      })}
+        <rect x={312} y={1012} width={729} height={106} rx={16} fill={C.card} stroke={C.border} strokeWidth={1.5} />
+        {levels.map((l, i) => {
+          const x0 = 312 + i * 182.25;
+          return (
+            <g key={l.label}>
+              {i > 0 && <line x1={x0} x2={x0} y1={1033} y2={1097} stroke={C.border} strokeWidth={1.5} />}
+              <Icon name={l.icon} x={x0 + 22} y={1033} size={34} color={l.ic} />
+              <text x={x0 + 70} y={1047} {...t(15, 600, C.label)} letterSpacing={0.4}>
+                {l.label}
+              </text>
+              <text x={x0 + 70} y={1086} {...t(fitFont(l.value, 182.25 - 70 - 12, 30, 18), 800, l.vc)}>
+                {l.value}
+              </text>
+            </g>
+          );
+        })}
+      </g>
 
       {/* bottom card */}
-      <rect x={40} y={1132} width={1001} height={128} rx={16} fill="#fff" stroke={C.border} strokeWidth={1.5} />
-      <line x1={bx[1]} x2={bx[1]} y1={1150} y2={1242} stroke={C.border} strokeWidth={1.5} />
-      <line x1={bx[2]} x2={bx[2]} y1={1150} y2={1242} stroke={C.border} strokeWidth={1.5} />
-      {[
-        { x0: bx[0], w: bottomW[0], icon: "calendar" as const, label: "TIME FRAME", value: d.timeframe.trim() || "—" },
-        { x0: bx[1], w: bottomW[1], icon: "chart" as const, label: "TRADE SETUP", value: d.setup.trim() || "—" },
-      ].map((c) => (
-        <g key={c.label}>
-          <Icon name={c.icon} x={c.x0 + 24} y={1161} size={34} color={C.navy} />
-          <text x={c.x0 + 73} y={1175} {...t(14.5, 600, C.label)} letterSpacing={0.4}>
-            {c.label}
-          </text>
-          <text x={c.x0 + 73} y={1208} {...t(fitFont(c.value, c.w - 73 - 16, 23, 14), 800, C.navyDark)}>
-            {c.value}
-          </text>
-        </g>
-      ))}
-      <Icon name="bulb" x={bx[2] + 24} y={1161} size={34} color={C.navy} />
-      <text x={bx[2] + 73} y={1175} {...t(14.5, 600, C.label)} letterSpacing={0.4}>
-        KEY REASON
-      </text>
-      {shownReasons.map((l, i) => (
-        <g key={i}>
-          {l.bullet && <circle cx={bx[2] + 77} cy={1191 + i * 19} r={2.6} fill={C.body} />}
-          <text x={bx[2] + 86} y={1196 + i * 19} {...t(15.5, 600, C.body)}>
-            {l.text}
-          </text>
-        </g>
-      ))}
-      {!shownReasons.length && (
-        <text x={bx[2] + 73} y={1208} {...t(23, 800, C.navyDark)}>
-          —
+      <g transform={at(4)}>
+        <rect x={40} y={1132} width={1001} height={128} rx={16} fill={C.card} stroke={C.border} strokeWidth={1.5} />
+        <line x1={bx[1]} x2={bx[1]} y1={1150} y2={1242} stroke={C.border} strokeWidth={1.5} />
+        <line x1={bx[2]} x2={bx[2]} y1={1150} y2={1242} stroke={C.border} strokeWidth={1.5} />
+        {[
+          { x0: bx[0], w: bottomW[0], icon: "calendar" as const, label: "TIME FRAME", value: d.timeframe.trim() || "—" },
+          { x0: bx[1], w: bottomW[1], icon: "chart" as const, label: "TRADE SETUP", value: d.setup.trim() || "—" },
+        ].map((c) => (
+          <g key={c.label}>
+            <Icon name={c.icon} x={c.x0 + 24} y={1161} size={34} color={C.icon} />
+            <text x={c.x0 + 73} y={1175} {...t(14.5, 600, C.label)} letterSpacing={0.4}>
+              {c.label}
+            </text>
+            <text x={c.x0 + 73} y={1208} {...t(fitFont(c.value, c.w - 73 - 16, 23, 14), 800, C.strong)}>
+              {c.value}
+            </text>
+          </g>
+        ))}
+        <Icon name="bulb" x={bx[2] + 24} y={1161} size={34} color={C.icon} />
+        <text x={bx[2] + 73} y={1175} {...t(14.5, 600, C.label)} letterSpacing={0.4}>
+          KEY REASON
         </text>
-      )}
-      <rect x={bx[3] + 6} y={1146} width={bottomW[3] - 18} height={100} rx={14} fill="#e6f6ef" />
-      <Icon name="risk" x={bx[3] + 22} y={1176} size={40} color={C.emerald} />
-      <text x={bx[3] + 76} y={1180} {...t(14.5, 600, C.label)} letterSpacing={0.4}>
-        RISK / REWARD
-      </text>
-      <text x={bx[3] + 76} y={1218} {...t(fitFont(d.riskReward.trim() || "—", bottomW[3] - 76 - 16, 31, 16), 800, C.navyDark)}>
-        {d.riskReward.trim() || "—"}
-      </text>
+        {shownReasons.map((l, i) => (
+          <g key={i}>
+            {l.bullet && <circle cx={bx[2] + 77} cy={1191 + i * 19} r={2.6} fill={C.body} />}
+            <text x={bx[2] + 86} y={1196 + i * 19} {...t(15.5, 600, C.body)}>
+              {l.text}
+            </text>
+          </g>
+        ))}
+        {!shownReasons.length && (
+          <text x={bx[2] + 73} y={1208} {...t(23, 800, C.strong)}>
+            —
+          </text>
+        )}
+        <rect x={bx[3] + 6} y={1146} width={bottomW[3] - 18} height={100} rx={14} fill={C.risk} />
+        <Icon name="risk" x={bx[3] + 22} y={1176} size={40} color={C.emerald} />
+        <text x={bx[3] + 76} y={1180} {...t(14.5, 600, C.label)} letterSpacing={0.4}>
+          RISK / REWARD
+        </text>
+        <text x={bx[3] + 76} y={1218} {...t(fitFont(d.riskReward.trim() || "—", bottomW[3] - 76 - 16, 31, 16), 800, C.strong)}>
+          {d.riskReward.trim() || "—"}
+        </text>
+      </g>
 
       {/* footer */}
-      <rect x={lineL} y={1300} width={170} height={2} rx={1} fill="url(#st-fl)" />
-      <rect x={lineR} y={1300} width={170} height={2} rx={1} fill="url(#st-fr)" />
-      <text x={540} y={1301} textAnchor="middle" dominantBaseline="central" {...t(14.5, 600, C.navy)} letterSpacing={3.4} xmlSpace="preserve">
-        {d.footer}
-      </text>
-      <g transform="translate(966 1234)" opacity={0.55} fill="none">
-        <path d="M20 118V92M44 118V74M68 118V56M92 118V36" stroke="#d6e3ec" strokeWidth={12} />
-        <path d="M6 96L40 66 62 76 104 30" stroke="#bfe8d4" strokeWidth={7} strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M86 28h20v20" stroke="#bfe8d4" strokeWidth={7} strokeLinecap="round" strokeLinejoin="round" />
-      </g>
+      {d.layout.showFooter && (
+        <g transform={`translate(0 ${L.footerDy})`}>
+          <rect x={lineL} y={1300} width={170} height={2} rx={1} fill="url(#st-fl)" />
+          <rect x={lineR} y={1300} width={170} height={2} rx={1} fill="url(#st-fr)" />
+          <text x={540} y={1301} textAnchor="middle" dominantBaseline="central" {...t(14.5, 600, C.pillText)} letterSpacing={3.4} xmlSpace="preserve">
+            {d.footer}
+          </text>
+          <g transform="translate(966 1234)" opacity={0.55} fill="none">
+            <path d="M20 118V92M44 118V74M68 118V56M92 118V36" stroke={C.deco1} strokeWidth={12} />
+            <path d="M6 96L40 66 62 76 104 30" stroke={C.deco2} strokeWidth={7} strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M86 28h20v20" stroke={C.deco2} strokeWidth={7} strokeLinecap="round" strokeLinejoin="round" />
+          </g>
+        </g>
+      )}
     </svg>
   );
 });

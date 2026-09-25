@@ -20,19 +20,21 @@ import {
 } from "lucide-react";
 import { downloadSvgAsPng, svgToPngBlob } from "@/social/export";
 import { VideoDownload } from "@/social/video-ui";
+import { igH } from "@/social/instagram/layout";
+import { LayoutPanel } from "@/social/instagram/layout-ui";
 import {
-  IG_H,
   IG_LOGOS,
   IG_W,
   type IgLogoVariant,
 } from "@/social/instagram/kit";
 import { cn } from "@/lib/utils";
-import { SwingTradeArtwork } from "./artwork";
+import { SwingTradeArtwork, swingLayout } from "./artwork";
 import {
   CHART_BOX,
   CHART_SHIFT,
   CHART_ZOOM_MAX,
   CHART_ZOOM_MIN,
+  SWING_THEMES,
   LOGO_MAX,
   LOGO_MIN,
   clampLogo,
@@ -58,6 +60,7 @@ export function SwingTradeEditor() {
   const set = <K extends keyof SwingTradeData>(k: K, v: SwingTradeData[K]) =>
     setData((d) => ({ ...d, [k]: v }));
   const problems = levelProblems(data);
+  const H = igH(data.layout);
   const rr = suggestedRR(data);
 
   async function download() {
@@ -66,7 +69,7 @@ export function SwingTradeEditor() {
     setMsg("");
     try {
       const name = `swing_${(data.ticker || "trade").toLowerCase().replace(/[^a-z0-9]+/g, "-")}_${data.date || "undated"}.png`;
-      await downloadSvgAsPng(svgRef.current, IG_W, IG_H, name);
+      await downloadSvgAsPng(svgRef.current, IG_W, H, name);
     } catch (e) {
       setMsg(e instanceof Error ? e.message : "Export failed");
     } finally {
@@ -124,7 +127,7 @@ export function SwingTradeEditor() {
     const r = svgRef.current.getBoundingClientRect();
     const k = IG_W / r.width;
     const cx = (e.clientX - r.left) * k;
-    const cy = (e.clientY - r.top) * k;
+    const cy = (e.clientY - r.top) * k - swingLayout(data).chartDy;
     const B = CHART_BOX;
     if (cx < B.x || cx > B.x + B.w || cy < B.y || cy > B.y + B.h) return;
     e.preventDefault();
@@ -235,6 +238,14 @@ export function SwingTradeEditor() {
             <RotateCcw className="h-4 w-4" /> Reset
           </button>
         </div>
+
+        <LayoutPanel
+          value={data.layout}
+          onChange={(l) => set("layout", l)}
+          themes={SWING_THEMES}
+          header="Show header (logo, date)"
+          footer="Show footer (tagline)"
+        />
 
         <Panel title="Stock">
           <div className="grid gap-4 sm:grid-cols-2">
@@ -790,7 +801,7 @@ export function SwingTradeEditor() {
           <div className="mb-3 flex items-center justify-between">
             <p className="font-display font-semibold">Live preview</p>
             <span className="rounded-full bg-secondary px-2.5 py-0.5 font-mono text-xs text-muted-foreground">
-              1080 × 1350
+              1080 × {H}
             </span>
           </div>
           <div
@@ -803,7 +814,7 @@ export function SwingTradeEditor() {
               data.chart && "cursor-move",
             )}
           >
-            <div data-plan-preview>
+            <div data-plan-preview className={cn(data.layout.format === "story" && "mx-auto max-w-[400px]")}>
               <SwingTradeArtwork
                 ref={svgRef}
                 data={data}
@@ -827,16 +838,16 @@ export function SwingTradeEditor() {
           <VideoDownload
             getPng={async () => {
               if (!svgRef.current) throw new Error("preview not ready");
-              return svgToPngBlob(svgRef.current, IG_W, IG_H);
+              return svgToPngBlob(svgRef.current, IG_W, H);
             }}
             fileBase={`swing_${(data.ticker || "trade").toLowerCase().replace(/[^a-z0-9]+/g, "-")}_${data.date || "undated"}`}
             w={IG_W}
-            h={IG_H}
+            h={H}
             onMsg={setMsg}
           />
           {msg && <p className="mt-2 text-sm text-muted-foreground">{msg}</p>}
           <p className="mt-2 text-xs text-muted-foreground">
-            Exports exactly 1080 × 1350 px. Your inputs are remembered in this
+            Exports exactly 1080 × {H} px. Your inputs are remembered in this
             browser.
           </p>
         </div>

@@ -1,11 +1,13 @@
 import { forwardRef } from "react";
 import {
   IG,
-  IG_H,
   IG_W,
   IgBackground,
   IgHeader,
+  IgPaletteProvider,
   IgSolidBadge,
+  igPalette,
+  useIg,
   SENTIMENT,
   fitFont,
   fitLines,
@@ -21,6 +23,7 @@ import {
   type MarketKey,
 } from "./data";
 import { PhotoBackground } from "./cover";
+import { igSpread } from "@/social/instagram/layout";
 import { MarketIcon } from "./icons";
 
 const PANEL_X = 60;
@@ -132,6 +135,7 @@ function oiMark(v: string) {
 
 /** OI slide figures: CE / PE OI change on top, buildup side (+ optional note) below. */
 function OiFigures({ m, uid }: { m: MarketItem; uid: string }) {
+  const IG = useIg();
   const cols = [
     {
       x: 100,
@@ -331,6 +335,7 @@ export const DetailSlide = forwardRef<
   SVGSVGElement,
   { data: GlobalMarketData; k: MarketKey; className?: string }
 >(function DetailSlide({ data, k, className }, ref) {
+  const IG = igPalette(data.layout.theme);
   const m = data.markets[k];
   const uid = `dt-${k}`;
   const page = MARKET_ORDER.indexOf(k) + 2;
@@ -375,6 +380,8 @@ export const DetailSlide = forwardRef<
 
   // description
   const descStart = panelBottom + 74;
+  // header above 170; body: heading row | panel | description; footer from 1245
+  const L = igSpread(data.layout, 170, 1245, [395, panelBottom + 20]);
   const descLines = wrapText(
     m.description,
     50,
@@ -382,230 +389,244 @@ export const DetailSlide = forwardRef<
   );
 
   return (
-    <svg
-      ref={ref}
-      viewBox={`0 0 ${IG_W} ${IG_H}`}
-      width={IG_W}
-      height={IG_H}
-      xmlns="http://www.w3.org/2000/svg"
-      className={className}
-      role="img"
-      aria-label={`${m.title} ${m.sentiment}`}
-    >
-      {data.coverPhoto ? (
-        <PhotoBackground dim={data.coverDim} uid={uid} detail />
-      ) : (
-        <IgBackground id={uid} />
-      )}
-      <IgHeader date={data.date} logo={data.logo} />
+    <IgPaletteProvider value={IG}>
+      <svg
+        ref={ref}
+        viewBox={`0 0 ${IG_W} ${L.H}`}
+        width={IG_W}
+        height={L.H}
+        xmlns="http://www.w3.org/2000/svg"
+        className={className}
+        role="img"
+        aria-label={`${m.title} ${m.sentiment}`}
+      >
+        {data.coverPhoto ? (
+          <PhotoBackground dim={data.coverDim} uid={uid} detail h={L.H} />
+        ) : (
+          <IgBackground id={uid} h={L.H} />
+        )}
+        {data.layout.showHeader && (
+          <IgHeader date={data.date} logo={data.logo} />
+        )}
 
-      {/* heading row */}
-      <MarketIcon k={k} x={60} y={196} size={152} uid={uid} />
-      {title.lines.map((line, i) => (
-        <text
-          key={i}
-          x={240}
-          y={titleCenter - titleBlock / 2 + (i + 0.5) * title.size * 1.1}
-          dominantBaseline="central"
-          fill={IG.text}
-          fontFamily={IG.font}
-          fontSize={title.size}
-          fontWeight={800}
-        >
-          {line}
-        </text>
-      ))}
-      {m.subtitle.trim() && (
-        <text
-          x={240}
-          y={titleCenter + titleBlock / 2 + 26}
-          dominantBaseline="central"
-          fill={IG.muted}
-          fontFamily={IG.font}
-          fontSize={30}
-          fontWeight={600}
-        >
-          {m.subtitle}
-        </text>
-      )}
-      <IgSolidBadge right={IG_W - 60} y={205} sentiment={m.sentiment} />
-
-      {/* figures panel */}
-      <rect
-        x={PANEL_X}
-        y={PANEL_Y}
-        width={PANEL_W}
-        height={panelH}
-        rx={28}
-        fill={IG.card}
-        fillOpacity={data.coverPhoto ? data.cardOpacity / 100 : 0.85}
-        stroke={IG.border}
-        strokeWidth={2}
-      />
-      {isOI ? (
-        <OiFigures m={m} uid={uid} />
-      ) : (
-        <>
-          <text
-            x={100}
-            y={462}
-            fill={IG.muted}
-            fontFamily={IG.font}
-            fontSize={30}
-            fontWeight={600}
-          >
-            Value
-          </text>
-          <text
-            x={100}
-            y={548}
-            fill={IG.text}
-            fontFamily={IG.font}
-            fontSize={valueSize}
-            fontWeight={800}
-          >
-            {value}
-          </text>
-          {m.valueNote.trim() && (
+        <g transform={`translate(0 ${L.dy(0)})`}>
+          {/* heading row */}
+          <MarketIcon k={k} x={60} y={196} size={152} uid={uid} />
+          {title.lines.map((line, i) => (
             <text
-              x={100}
-              y={600}
+              key={i}
+              x={240}
+              y={titleCenter - titleBlock / 2 + (i + 0.5) * title.size * 1.1}
+              dominantBaseline="central"
+              fill={IG.text}
+              fontFamily={IG.font}
+              fontSize={title.size}
+              fontWeight={800}
+            >
+              {line}
+            </text>
+          ))}
+          {m.subtitle.trim() && (
+            <text
+              x={240}
+              y={titleCenter + titleBlock / 2 + 26}
+              dominantBaseline="central"
               fill={IG.muted}
               fontFamily={IG.font}
-              fontSize={26}
-              fontWeight={500}
+              fontSize={30}
+              fontWeight={600}
             >
-              {m.valueNote}
+              {m.subtitle}
             </text>
           )}
-          <line
-            x1={540}
-            x2={540}
-            y1={436}
-            y2={620}
+          <IgSolidBadge right={IG_W - 60} y={205} sentiment={m.sentiment} />
+        </g>
+
+        <g transform={`translate(0 ${L.dy(1)})`}>
+          {/* figures panel */}
+          <rect
+            x={PANEL_X}
+            y={PANEL_Y}
+            width={PANEL_W}
+            height={panelH}
+            rx={28}
+            fill={IG.card}
+            fillOpacity={data.coverPhoto ? data.cardOpacity / 100 : 0.85}
             stroke={IG.border}
             strokeWidth={2}
           />
-          <text
-            x={580}
-            y={462}
-            fill={IG.muted}
-            fontFamily={IG.font}
-            fontSize={30}
-            fontWeight={600}
-          >
-            {m.secondLabel}
-          </text>
-          <text
-            x={580}
-            y={548}
-            fill={st.color}
-            fontFamily={IG.font}
-            fontSize={secondSize}
-            fontWeight={800}
-          >
-            {second}
-            {st.mark && (
-              <tspan dx={16} fontSize={secondSize * 0.62}>
-                {st.mark}
-              </tspan>
-            )}
-          </text>
-        </>
-      )}
-      {hasChart && chartImage && (
-        <g>
-          <defs>
-            <clipPath id={`${uid}-panel`}>
-              <rect
+          {isOI ? (
+            <OiFigures m={m} uid={uid} />
+          ) : (
+            <>
+              <text
+                x={100}
+                y={462}
+                fill={IG.muted}
+                fontFamily={IG.font}
+                fontSize={30}
+                fontWeight={600}
+              >
+                Value
+              </text>
+              <text
+                x={100}
+                y={548}
+                fill={IG.text}
+                fontFamily={IG.font}
+                fontSize={valueSize}
+                fontWeight={800}
+              >
+                {value}
+              </text>
+              {m.valueNote.trim() && (
+                <text
+                  x={100}
+                  y={600}
+                  fill={IG.muted}
+                  fontFamily={IG.font}
+                  fontSize={26}
+                  fontWeight={500}
+                >
+                  {m.valueNote}
+                </text>
+              )}
+              <line
+                x1={540}
+                x2={540}
+                y1={436}
+                y2={620}
+                stroke={IG.border}
+                strokeWidth={2}
+              />
+              <text
+                x={580}
+                y={462}
+                fill={IG.muted}
+                fontFamily={IG.font}
+                fontSize={30}
+                fontWeight={600}
+              >
+                {m.secondLabel}
+              </text>
+              <text
+                x={580}
+                y={548}
+                fill={st.color}
+                fontFamily={IG.font}
+                fontSize={secondSize}
+                fontWeight={800}
+              >
+                {second}
+                {st.mark && (
+                  <tspan dx={16} fontSize={secondSize * 0.62}>
+                    {st.mark}
+                  </tspan>
+                )}
+              </text>
+            </>
+          )}
+          {hasChart && chartImage && (
+            <g>
+              <defs>
+                <clipPath id={`${uid}-panel`}>
+                  <rect
+                    x={PANEL_X + 1}
+                    y={PANEL_Y + TOP_H}
+                    width={PANEL_W - 2}
+                    height={CHART_H - 1}
+                    rx={27}
+                  />
+                  <rect
+                    x={PANEL_X + 1}
+                    y={PANEL_Y + TOP_H}
+                    width={PANEL_W - 2}
+                    height={40}
+                  />
+                </clipPath>
+              </defs>
+              <image
+                href={chartImage}
                 x={PANEL_X + 1}
                 y={PANEL_Y + TOP_H}
                 width={PANEL_W - 2}
                 height={CHART_H - 1}
-                rx={27}
+                preserveAspectRatio="xMidYMid slice"
+                clipPath={`url(#${uid}-panel)`}
+                opacity={data.chartOpacity / 100}
               />
-              <rect
-                x={PANEL_X + 1}
-                y={PANEL_Y + TOP_H}
-                width={PANEL_W - 2}
-                height={40}
+            </g>
+          )}
+          {hasChart && (
+            <g>
+              <line
+                x1={100}
+                x2={IG_W - 100}
+                y1={PANEL_Y + TOP_H}
+                y2={PANEL_Y + TOP_H}
+                stroke={IG.border}
+                strokeOpacity={0.6}
+                strokeWidth={2}
               />
-            </clipPath>
-          </defs>
-          <image
-            href={chartImage}
-            x={PANEL_X + 1}
-            y={PANEL_Y + TOP_H}
-            width={PANEL_W - 2}
-            height={CHART_H - 1}
-            preserveAspectRatio="xMidYMid slice"
-            clipPath={`url(#${uid}-panel)`}
-            opacity={data.chartOpacity / 100}
-          />
-        </g>
-      )}
-      {hasChart && (
-        <g>
-          <line
-            x1={100}
-            x2={IG_W - 100}
-            y1={PANEL_Y + TOP_H}
-            y2={PANEL_Y + TOP_H}
-            stroke={IG.border}
-            strokeOpacity={0.6}
-            strokeWidth={2}
-          />
-          {!chartImage && (
-            <Sparkline
-              values={pts}
-              color={s.color}
-              uid={uid}
-              x={100}
-              y={PANEL_Y + TOP_H + 40}
-              w={PANEL_W - 80}
-              h={CHART_H - 80}
-            />
+              {!chartImage && (
+                <Sparkline
+                  values={pts}
+                  color={s.color}
+                  uid={uid}
+                  x={100}
+                  y={PANEL_Y + TOP_H + 40}
+                  w={PANEL_W - 80}
+                  h={CHART_H - 80}
+                />
+              )}
+            </g>
           )}
         </g>
-      )}
 
-      {/* description */}
-      {descLines.map((line, i) => (
-        <text
-          key={i}
-          x={62}
-          y={descStart + i * 52}
-          fill={IG.text}
-          fontFamily={IG.font}
-          fontSize={34}
-          fontWeight={500}
-        >
-          {line}
-        </text>
-      ))}
+        {/* description */}
+        <g transform={`translate(0 ${L.dy(2)})`}>
+          {descLines.map((line, i) => (
+            <text
+              key={i}
+              x={62}
+              y={descStart + i * 52}
+              fill={IG.text}
+              fontFamily={IG.font}
+              fontSize={34}
+              fontWeight={500}
+            >
+              {line}
+            </text>
+          ))}
+        </g>
 
-      {/* footer */}
-      <text
-        x={60}
-        y={1290}
-        fill={IG.muted}
-        fontFamily={IG.font}
-        fontSize={26}
-        fontWeight={700}
-      >
-        {page}/{TOTAL_SLIDES}
-      </text>
-      <text
-        x={IG_W - 60}
-        y={1290}
-        textAnchor="end"
-        fill={IG.text}
-        fontFamily={IG.font}
-        fontSize={26}
-        fontWeight={700}
-      >
-        {data.swipe}
-      </text>
-    </svg>
+        {/* footer */}
+        {data.layout.showFooter && (
+          <g transform={`translate(0 ${L.footerDy})`}>
+            <text
+              x={60}
+              y={1290}
+              fill={IG.muted}
+              fontFamily={IG.font}
+              fontSize={26}
+              fontWeight={700}
+            >
+              {page}/{TOTAL_SLIDES}
+            </text>
+            <text
+              x={IG_W - 60}
+              y={1290}
+              textAnchor="end"
+              fill={IG.text}
+              fontFamily={IG.font}
+              fontSize={26}
+              fontWeight={700}
+            >
+              {data.swipe}
+            </text>
+          </g>
+        )}
+      </svg>
+    </IgPaletteProvider>
   );
 });

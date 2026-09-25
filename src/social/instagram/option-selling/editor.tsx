@@ -3,10 +3,12 @@ import { usePlannedDraft } from "@/social/saved-posts";
 import { Download, FileDown, Loader2, Plus, RotateCcw, Sparkles, Trash2, Upload } from "lucide-react";
 import { downloadSvgAsPng, svgToPngBlob } from "@/social/export";
 import { VideoDownload } from "@/social/video-ui";
-import { IG_H, IG_LOGOS, IG_W, type IgLogoVariant } from "@/social/instagram/kit";
+import { IG_LOGOS, IG_W, type IgLogoVariant } from "@/social/instagram/kit";
+import { igH } from "@/social/instagram/layout";
+import { LayoutPanel } from "@/social/instagram/layout-ui";
 import { cn } from "@/lib/utils";
 import { OptionSellingArtwork } from "./artwork";
-import { MAX_LEGS, defaultData, emptyLeg, exampleData, fmtRupees, mergeData, pnl, type Leg, type OptionSellingData } from "./data";
+import { MAX_LEGS, OPTION_THEMES, defaultData, emptyLeg, exampleData, fmtRupees, mergeData, pnl, type Leg, type OptionSellingData } from "./data";
 
 const STORE_KEY = "social:Instagram_WeeklyOptionSelling";
 
@@ -22,6 +24,7 @@ export function OptionSellingEditor() {
   const setLeg = (i: number, p: Partial<Leg>) => setData((d) => ({ ...d, legs: d.legs.map((l, j) => (j === i ? { ...l, ...p } : l)) }));
   const closed = data.mode === "CLOSE";
   const r = closed ? pnl(data) : null;
+  const H = igH(data.layout);
 
   async function download() {
     if (!svgRef.current) return;
@@ -33,7 +36,7 @@ export function OptionSellingEditor() {
       await downloadSvgAsPng(
         svgRef.current,
         IG_W,
-        IG_H,
+        H,
         `option-selling_${data.instrument.toLowerCase().replace(/[^a-z0-9]+/g, "-") || "trade"}_${strike}_${data.mode.toLowerCase()}_${data.date}.png`,
       );
     } catch (e) {
@@ -81,6 +84,8 @@ export function OptionSellingEditor() {
             <RotateCcw className="h-4 w-4" /> Reset
           </button>
         </div>
+
+        <LayoutPanel value={data.layout} onChange={(l) => set("layout", l)} themes={OPTION_THEMES} header="Show header (logo, tagline)" footer="Show footer (plan · execute · manage risk)" />
 
         <Panel title="Mode" note="Entry: quantity and entry price. Close: adds the close price and the total P&L.">
           <Toggle
@@ -262,9 +267,9 @@ export function OptionSellingEditor() {
         <div className="card-elevated rounded-2xl border border-border bg-card p-4">
           <div className="mb-3 flex items-center justify-between">
             <p className="font-display font-semibold">Live preview</p>
-            <span className="rounded-full bg-secondary px-2.5 py-0.5 font-mono text-xs text-muted-foreground">1080 × 1350</span>
+            <span className="rounded-full bg-secondary px-2.5 py-0.5 font-mono text-xs text-muted-foreground">1080 × {H}</span>
           </div>
-          <div data-plan-preview>
+          <div data-plan-preview className={cn(data.layout.format === "story" && "mx-auto max-w-[400px]")}>
             <OptionSellingArtwork ref={svgRef} data={data} className="block h-auto w-full rounded-lg shadow-lg" />
           </div>
           <button
@@ -279,25 +284,25 @@ export function OptionSellingEditor() {
           <VideoDownload
             getPng={async () => {
               if (!svgRef.current) throw new Error("preview not ready");
-              return svgToPngBlob(svgRef.current, IG_W, IG_H);
+              return svgToPngBlob(svgRef.current, IG_W, H);
             }}
             fileBase={`option-selling_${data.instrument.toLowerCase().replace(/[^a-z0-9]+/g, "-") || "trade"}_${data.mode.toLowerCase()}_${data.date}`}
             w={IG_W}
-            h={IG_H}
+            h={H}
             onMsg={setMsg}
           />
           {msg && <p className="mt-2 text-sm text-muted-foreground">{msg}</p>}
-          <p className="mt-2 text-xs text-muted-foreground">Exports exactly 1080 × 1350 px. Your inputs are remembered in this browser.</p>
+          <p className="mt-2 text-xs text-muted-foreground">Exports exactly 1080 × {H} px. Your inputs are remembered in this browser.</p>
         </div>
       </div>
     </div>
   );
 }
 
-const btn = "inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium hover:bg-secondary";
-const inputCls = "w-full rounded-lg border border-input bg-card px-3 py-2 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/30";
+export const btn = "inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium hover:bg-secondary";
+export const inputCls = "w-full rounded-lg border border-input bg-card px-3 py-2 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/30";
 
-function Toggle<T extends string>({ value, onChange, options }: { value: T; onChange: (v: T) => void; options: [T, string, string][] }) {
+export function Toggle<T extends string>({ value, onChange, options }: { value: T; onChange: (v: T) => void; options: [T, string, string][] }) {
   return (
     <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))` }} role="radiogroup">
       {options.map(([v, label, c]) => (
@@ -317,7 +322,7 @@ function Toggle<T extends string>({ value, onChange, options }: { value: T; onCh
   );
 }
 
-function Panel({ title, note, children }: { title: string; note?: string; children: ReactNode }) {
+export function Panel({ title, note, children }: { title: string; note?: string; children: ReactNode }) {
   return (
     <section className="card-elevated rounded-2xl border border-border bg-card p-5">
       <p className="font-display text-lg font-semibold">{title}</p>
@@ -327,7 +332,7 @@ function Panel({ title, note, children }: { title: string; note?: string; childr
   );
 }
 
-function Field({ label, children }: { label: string; children: ReactNode }) {
+export function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
     <label className="block">
       <span className="mb-1 block text-xs font-medium text-muted-foreground">{label}</span>

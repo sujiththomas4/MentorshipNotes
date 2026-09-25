@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ArrowDown, ArrowUp, Plus, RotateCcw, Trash2 } from "lucide-react";
 import { BV_VARIANTS } from "@/branding/bethlehem-valley";
 import { cn } from "@/lib/utils";
-import { Field, JsonButtons, LogoPicker, Panel, PreviewCard, btn, inputCls, useStoredPost } from "../editor-kit";
+import { Field, FormatPanel, JsonButtons, LogoPicker, Panel, PreviewCard, btn, inputCls, useStoredPost } from "../editor-kit";
 import { BrandTitlePanel } from "../brand-title";
 import { ImagePicker } from "../image-library";
 import { BV_ART, ICON_NAMES, bvFileBase, fitMessage, type FitResult } from "../shared";
@@ -55,7 +55,7 @@ export function TipsListEditor() {
     <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_minmax(0,540px)]">
       <div className="space-y-6">
         <div className="flex flex-wrap gap-2">
-          <JsonButtons data={data} fileBase={bvFileBase(data.category, "feed")} onOpen={(raw) => setData(mergeData(raw))} onMsg={setMsg} check={(raw) => "tips" in raw} />
+          <JsonButtons data={data} fileBase={bvFileBase(data.category, data.format)} onOpen={(raw) => setData(mergeData(raw))} onMsg={setMsg} check={(raw) => "tips" in raw} />
           <button
             type="button"
             onClick={() => confirm("Replace everything with the sample post?") && (setData(sampleData()), setMsg("Reset to the sample post."))}
@@ -64,6 +64,8 @@ export function TipsListEditor() {
             <RotateCcw className="h-4 w-4" /> Reset to sample post
           </button>
         </div>
+
+        <FormatPanel data={data} set={set} note="Story stretches the layout: taller tip cards, the photo and figure fill the height." />
 
         <Panel title="Heading" note="Number badge, two-line title and the line above the tips.">
           <div className="grid gap-4 sm:grid-cols-2">

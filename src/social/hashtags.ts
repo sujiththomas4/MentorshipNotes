@@ -186,6 +186,7 @@ export const HASHTAGS: Record<string, HashtagSet> = {
   Instagram_GlobalMarket_All: GLOBAL_MARKET,
   Instagram_SwingTrade: SWING_TRADE,
   Instagram_WeeklyOptionSelling: OPTION_SELLING,
+  Instagram_WeeklyOptionSellingV2: OPTION_SELLING,
   Instagram_BV_FarmTip: FARM_TIP,
   Instagram_BV_FarmNotes: FARM_TIP,
   Instagram_BV_StepByStep: STEP_BY_STEP,

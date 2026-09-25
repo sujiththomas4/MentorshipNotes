@@ -6,13 +6,16 @@ import {
   CalendarClock,
   ChevronRight,
   ImagePlus,
+  Info,
   LayoutTemplate,
   Radio,
+  Star,
 } from "lucide-react";
 import { Page } from "@/components/page";
 import { BrandMark } from "@/components/brand-mark";
 import { cn } from "@/lib/utils";
 import { BRANDS, type Brand, type BrandId } from "@/branding/brands";
+import { useFavourites } from "@/social/favourites";
 import { getPlatform, type SocialPlatform } from "@/social/registry";
 import { DAY_LONG, useScheduleState, type Weekday } from "@/social/schedule";
 import { LiveBadge, ScheduleBlock } from "@/social/schedule-ui";
@@ -195,6 +198,27 @@ function Tab({
   );
 }
 
+/** ⓘ button; the text shows on hover, or on tap / keyboard focus. */
+function InfoTip({ text }: { text: string }) {
+  return (
+    <span className="group/tip relative shrink-0">
+      <button
+        type="button"
+        aria-label="About this template"
+        className="flex h-7 w-7 items-center justify-center rounded-full text-muted-foreground hover:bg-secondary hover:text-foreground"
+      >
+        <Info className="h-4 w-4" />
+      </button>
+      <span
+        role="tooltip"
+        className="pointer-events-none invisible absolute right-0 top-full z-30 mt-1 w-72 max-w-[80vw] rounded-xl border border-border bg-popover p-3 text-sm leading-relaxed text-popover-foreground opacity-0 shadow-xl transition-opacity group-focus-within/tip:visible group-focus-within/tip:opacity-100 group-hover/tip:visible group-hover/tip:opacity-100"
+      >
+        {text}
+      </span>
+    </span>
+  );
+}
+
 const Count = ({ n }: { n: number }) => (
   <span className="rounded-full bg-black/10 px-1.5 font-mono text-[11px] opacity-80">
     {n}
@@ -218,11 +242,13 @@ function BrandSection({
   liveToday: (id: string) => boolean;
   timeFor: (id: string) => string;
 }) {
+  const fav = useFavourites();
+  // favourites first, then what goes live today, then the registry order
   const rows = p.templates
     .map((t, i) => ({ t, i, days: daysFor(t.id, t.schedule) }))
     .filter((r) => r.t.brand === b.id)
-    .map((r) => ({ ...r, live: liveToday(r.t.id) }))
-    .sort((a, c) => Number(c.live) - Number(a.live) || a.i - c.i);
+    .map((r) => ({ ...r, live: liveToday(r.t.id), star: fav.isFav(r.t.id) }))
+    .sort((a, c) => Number(c.star) - Number(a.star) || Number(c.live) - Number(a.live) || a.i - c.i);
 
   return (
     <section className="mt-10">
@@ -254,11 +280,11 @@ function BrandSection({
       </div>
 
       <div className="mt-5 grid gap-6 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-        {rows.map(({ t, days, live }) => (
+        {rows.map(({ t, days, live, star }) => (
           <div
             key={t.id}
             className={cn(
-              "card-elevated group flex flex-col overflow-hidden rounded-2xl border bg-card transition-all hover:-translate-y-0.5 hover:shadow-xl",
+              "card-elevated group relative flex flex-col rounded-2xl border bg-card transition-all hover:z-10 hover:-translate-y-0.5 hover:shadow-xl focus-within:z-10",
               live
                 ? "border-emerald-400 ring-2 ring-emerald-400/60"
                 : "border-border hover:border-accent",
@@ -267,7 +293,7 @@ function BrandSection({
             <Link
               to="/social/$platform/$template"
               params={{ platform: p.id, template: t.id }}
-              className="relative block bg-[#071422] p-4"
+              className="relative block rounded-t-[15px] bg-[#071422] p-4"
             >
               <div className="overflow-hidden rounded-lg">
                 <t.Thumbnail />
@@ -280,16 +306,26 @@ function BrandSection({
               />
             </Link>
             <div className="flex flex-1 flex-col p-5">
-              <Link
-                to="/social/$platform/$template"
-                params={{ platform: p.id, template: t.id }}
-                className="break-all font-mono text-sm font-bold hover:text-accent"
-              >
-                {t.title}
-              </Link>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {t.description}
-              </p>
+              <div className="flex items-start gap-1">
+                <Link
+                  to="/social/$platform/$template"
+                  params={{ platform: p.id, template: t.id }}
+                  className="min-w-0 flex-1 break-all pt-1 font-mono text-sm font-bold hover:text-accent"
+                >
+                  {t.title}
+                </Link>
+                <InfoTip text={t.description} />
+                <button
+                  type="button"
+                  onClick={() => fav.toggle(t.id)}
+                  aria-pressed={star}
+                  aria-label={star ? `Remove ${t.title} from favourites` : `Add ${t.title} to favourites`}
+                  title={star ? "Favourite: shown first. Click to remove." : "Add to favourites (shown first)"}
+                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full hover:bg-secondary"
+                >
+                  <Star className={cn("h-4 w-4", star ? "fill-amber-400 text-amber-500" : "text-muted-foreground")} />
+                </button>
+              </div>
               <div className="mt-3">
                 <ScheduleBlock
                   template={t}

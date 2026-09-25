@@ -1,4 +1,5 @@
 import type { IgLogoVariant } from "@/social/instagram/kit";
+import { defaultLayout, mergeLayout, type IgLayout, type IgTheme } from "@/social/instagram/layout";
 
 /*
  * Weekly Option Selling post (1080 × 1350), from the "Systematic Option Selling" HTML design.
@@ -35,7 +36,14 @@ export type OptionSellingData = {
   tagline: string;
   footer: [string, string, string];
   logo: IgLogoVariant;
+  /** format (feed / story), header + footer on/off, colour theme */
+  layout: IgLayout;
 };
+
+export const OPTION_THEMES: IgTheme[] = [
+  { id: "gold", label: "Gold & black", swatch: ["#07080b", "#f5b800", "#22d46b"] },
+  { id: "navy", label: "Gold & navy", swatch: ["#13305c", "#f5b800", "#22d46b"] },
+];
 
 export const MAX_LEGS = 4;
 
@@ -62,6 +70,7 @@ export function defaultData(): OptionSellingData {
     tagline: "LEARN | TRADE | GROW",
     footer: ["PLAN", "EXECUTE", "MANAGE RISK"],
     logo: "horizontal",
+    layout: defaultLayout("gold"),
   };
 }
 
@@ -127,6 +136,7 @@ export function mergeData(raw: Record<string, unknown> | null): OptionSellingDat
     tagline: raw.tagline !== undefined ? str(raw.tagline) : raw.headerTagline !== undefined ? str(raw.headerTagline) : base.tagline,
     footer: [footer[0] ?? "", footer[1] ?? "", footer[2] ?? ""],
     logo: raw.logo === "tricolor" ? "tricolor" : "horizontal",
+    layout: mergeLayout(raw.layout, base.layout, OPTION_THEMES),
   };
 }
 
@@ -155,7 +165,7 @@ export type PnL = { ok: true; total: number; percent: number | null; credit: num
  * Total P&L of all legs (CLOSE mode): SELL (entry − exit) × qty, BUY (exit − entry) × qty.
  * % = total ÷ base; base = margin used when given, else the net premium received.
  */
-export function pnl(d: OptionSellingData): PnL {
+export function pnl(d: Pick<OptionSellingData, "legs" | "percentBase">): PnL {
   let total = 0;
   let credit = 0;
   for (const [i, l] of d.legs.entries()) {

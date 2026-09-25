@@ -11,6 +11,20 @@ import type { BrandId } from "@/branding/brands";
 import { OptionSellingArtwork } from "@/social/instagram/option-selling/artwork";
 import { exampleData as optionSellingExample } from "@/social/instagram/option-selling/data";
 import { OptionSellingEditor } from "@/social/instagram/option-selling/editor";
+import { IntroArtwork } from "@/social/instagram/indicator/intro-artwork";
+import { DetailsArtwork } from "@/social/instagram/indicator/details-artwork";
+import { detailsSample, introSample } from "@/social/instagram/indicator/data";
+import { IndicatorIntroEditor } from "@/social/instagram/indicator/intro-editor";
+import { IndicatorDetailsEditor } from "@/social/instagram/indicator/details-editor";
+import { SetupArtwork } from "@/social/instagram/indicator/setup-artwork";
+import { setupSample } from "@/social/instagram/indicator/setup-data";
+import { IndicatorSetupEditor } from "@/social/instagram/indicator/setup-editor";
+import { PsychologyArtwork } from "@/social/instagram/trading-psychology/artwork";
+import { defaultData as psychologySample } from "@/social/instagram/trading-psychology/data";
+import { PsychologyEditor } from "@/social/instagram/trading-psychology/editor";
+import { OptionSellingV2Artwork } from "@/social/instagram/option-selling-v2/artwork";
+import { exampleData as optionSellingV2Example } from "@/social/instagram/option-selling-v2/data";
+import { OptionSellingV2Editor } from "@/social/instagram/option-selling-v2/editor";
 import { Scaled } from "@/social/instagram/bethlehem-valley/shared";
 import { FarmNotesArtwork } from "@/social/instagram/bethlehem-valley/farm-notes/artwork";
 import { sampleData as farmNotesSample } from "@/social/instagram/bethlehem-valley/farm-notes/data";
@@ -70,7 +84,7 @@ export const PLATFORMS: SocialPlatform[] = [
         id: "Instagram_GlobalMarket_All",
         title: "Instagram_GlobalMarket_All",
         description: "7-slide daily carousel: a global market sentiment cover plus one slide each for Dow, crude oil, dollar index, Gift Nifty, previous-day OI and pre-open.",
-        size: { w: 1080, h: 1350, label: "1080 × 1350 · 4:5 portrait" },
+        size: { w: 1080, h: 1350, label: "1080 × 1350 feed · or 1080 × 1920 story" },
         schedule: { days: [1, 2, 3, 4, 5] },
         brand: "indian-traders",
         Editor: GlobalMarketEditor,
@@ -80,7 +94,7 @@ export const PLATFORMS: SocialPlatform[] = [
         id: "Instagram_SwingTrade",
         title: "Swing Trade",
         description: "Single swing-trade post: stock, BUY/SELL direction, entry, targets, stop loss, chart, key reasons and risk/reward.",
-        size: { w: 1080, h: 1350, label: "1080 × 1350 · 4:5 portrait" },
+        size: { w: 1080, h: 1350, label: "1080 × 1350 feed · or 1080 × 1920 story" },
         schedule: { days: [6, 0], note: "weekly / occasional" },
         brand: "indian-traders",
         Editor: SwingTradeEditor,
@@ -90,11 +104,65 @@ export const PLATFORMS: SocialPlatform[] = [
         id: "Instagram_WeeklyOptionSelling",
         title: "Weekly Option Selling",
         description: "Gold & black option-selling post: 1–4 legs (BUY/SELL, strike, CE/PE, qty, price); Entry or Close mode, Close adds exit prices and the total P&L.",
-        size: { w: 1080, h: 1350, label: "1080 × 1350 · 4:5 portrait" },
+        size: { w: 1080, h: 1350, label: "1080 × 1350 feed · or 1080 × 1920 story" },
         schedule: { days: [1, 3] },
         brand: "indian-traders",
         Editor: OptionSellingEditor,
         Thumbnail: () => <OptionSellingArtwork data={optionSellingExample()} className="block h-auto w-full" />,
+      },
+      {
+        id: "Instagram_WeeklyOptionSellingV2",
+        title: "Weekly Option Selling V2",
+        description: "Bull & bear 'Weekly Option Selling' artwork with a trade card: date, instrument, strategy and 1–4 legs. Entry mode shows the entry label and net premium; Exit mode adds exit prices, the total P&L and %.",
+        size: { w: 1080, h: 1350, label: "1080 × 1350 · 4:5 portrait" },
+        schedule: { days: [1, 3] },
+        brand: "indian-traders",
+        Editor: OptionSellingV2Editor,
+        Thumbnail: () => <OptionSellingV2Artwork data={optionSellingV2Example()} className="block h-auto w-full" />,
+      },
+      {
+        id: "Instagram_TradingPsychology",
+        title: "Trading Psychology Facts",
+        description:
+          "Black & gold education post: brush title (TRADING / PSYCHOLOGY / FACTS) with a gold-highlighted subtitle, 3–6 neon fact cards with icons in the right column, a trader photo faded in on the left, a “Better mindset = Better trades” line over a glowing gold chart, and the plan / execute / manage-risk footer with a hashtag.",
+        size: { w: 1080, h: 1350, label: "1080 × 1350 feed · or 1080 × 1920 story" },
+        schedule: { days: [], note: "weekly / occasional" },
+        brand: "indian-traders",
+        Editor: PsychologyEditor,
+        Thumbnail: () => <PsychologyArtwork data={psychologySample()} className="block h-auto w-full" />,
+      },
+      {
+        id: "Instagram_IndicatorIntro",
+        title: "Indicator Intro",
+        description:
+          "Swing Trade style (white, navy & green) introduction to one indicator, e.g. VWAP, Camarilla pivots, CPR: big title with full name, brush banner, three quick facts with icons, your chart (or a sample chart with the indicator line), why it matters and a golden-rule box.",
+        size: { w: 1080, h: 1350, label: "1080 × 1350 feed · or 1080 × 1920 story" },
+        schedule: { days: [], note: "weekly / occasional" },
+        brand: "indian-traders",
+        Editor: IndicatorIntroEditor,
+        Thumbnail: () => <IntroArtwork data={introSample()} className="block h-auto w-full" />,
+      },
+      {
+        id: "Instagram_IndicatorDetails",
+        title: "Indicator Details",
+        description:
+          "The follow-up screen in the same style: the indicator's key points to note as 3–7 numbered cards with icons (heading + short text), and a pro-tip box, e.g. VWAP notes, Camarilla S3/R3 inside CPR, VWAP on the strike chart.",
+        size: { w: 1080, h: 1350, label: "1080 × 1350 feed · or 1080 × 1920 story" },
+        schedule: { days: [], note: "weekly / occasional" },
+        brand: "indian-traders",
+        Editor: IndicatorDetailsEditor,
+        Thumbnail: () => <DetailsArtwork data={detailsSample()} className="block h-auto w-full" />,
+      },
+      {
+        id: "Instagram_IndicatorSetup",
+        title: "Indicator Setup",
+        description:
+          "One powerful idea per post, Swing Trade style: statement title (e.g. VWAP ON PREMIUM), your chart or a drawn illustration made for the setup, three “how to trade it” step cards and a rule strip. Presets: VWAP on the premium chart, Camarilla Pivot on the premium chart, Camarilla S3 / R3 inside CPR.",
+        size: { w: 1080, h: 1350, label: "1080 × 1350 feed · or 1080 × 1920 story" },
+        schedule: { days: [], note: "weekly / occasional" },
+        brand: "indian-traders",
+        Editor: IndicatorSetupEditor,
+        Thumbnail: () => <SetupArtwork data={setupSample()} className="block h-auto w-full" />,
       },
       {
         id: "Instagram_BV_Caricature",
@@ -208,7 +276,7 @@ export const PLATFORMS: SocialPlatform[] = [
         title: "Tips List",
         description:
           "Malayalam numbered tips post: logo, number badge, two-line title, 3–6 tip cards with icons, a callout line, a farmer cut-out over a faded photo and a four-benefit footer band with the website.",
-        size: { w: 1080, h: 1350, label: "1080 × 1350 feed" },
+        size: { w: 1080, h: 1350, label: "1080 × 1350 feed · or 1080 × 1920 story" },
         schedule: { days: [], note: "posting days not set yet" },
         brand: "bethlehem-valley",
         Editor: TipsListEditor,
@@ -223,7 +291,7 @@ export const PLATFORMS: SocialPlatform[] = [
         title: "Ideas Cover",
         description:
           "Malayalam carousel cover: logo, slide number, three-line title with a leaf, divider, two-line subtitle, a square number badge, a white panel with four feature icons, pager dots and the handle, and a farmer cut-out over a farm photo on the right.",
-        size: { w: 1080, h: 1350, label: "1080 × 1350 feed" },
+        size: { w: 1080, h: 1350, label: "1080 × 1350 feed · or 1080 × 1920 story" },
         schedule: { days: [], note: "posting days not set yet" },
         brand: "bethlehem-valley",
         Editor: IdeasCoverEditor,

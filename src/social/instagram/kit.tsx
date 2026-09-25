@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { createContext, useContext, type ReactNode } from "react";
 
 /*
  * Shared pieces for Indian Traders Instagram artwork. Everything is drawn in a fixed
@@ -21,6 +21,30 @@ export const IG = {
   neutral: "#8292a2",
   font: "Inter, 'Manrope', 'DM Sans', system-ui, -apple-system, 'Segoe UI', Arial, sans-serif",
 } as const;
+
+/** Colour themes for the dark slides (Global Market). The bull / bear colours stay the same. */
+export type IgPalette = { [K in keyof typeof IG]: string } & { bgTop: string; bgBot: string; glow1: string; glow2: string; globe: string };
+export const IG_PALETTES: Record<string, IgPalette> = {
+  navy: { ...IG, bgTop: "#0A1B2C", bgBot: "#050E18", glow1: "#1F8BFF", glow2: "#0E4F8A", globe: "#5FB2FF" },
+  black: {
+    ...IG,
+    bg: "#050505",
+    card: "#131313",
+    card2: "#1b1b1b",
+    border: "#3f3f3f",
+    muted: "#b8b8b8",
+    bgTop: "#121212",
+    bgBot: "#020202",
+    glow1: "#8a8a8a",
+    glow2: "#3a3a3a",
+    globe: "#a8a8a8",
+  },
+};
+const IgPaletteContext = createContext<IgPalette>(IG_PALETTES.navy);
+/** Wrap a slide so its parts (header, footer, tiles…) use the chosen palette. */
+export const IgPaletteProvider = IgPaletteContext.Provider;
+export const useIg = () => useContext(IgPaletteContext);
+export const igPalette = (theme: string | undefined) => IG_PALETTES[theme ?? "navy"] ?? IG_PALETTES.navy;
 
 /** Locked logos from Branding (public/branding/logos). Never redrawn: placed as the PNG. */
 export const IG_LOGOS = {
@@ -196,7 +220,8 @@ export function IgSentimentCard({ x, y, w, h, sentiment }: { x: number; y: numbe
 }
 
 /** Dark navy background with a soft glow, faint grid, a faint rising chart and a globe at the bottom. */
-export function IgBackground({ id }: { id: string }) {
+export function IgBackground({ id, h = IG_H }: { id: string; h?: number }) {
+  const IG = useIg();
   const chart = [
     [0, 560], [70, 540], [140, 575], [210, 520], [280, 545], [350, 490], [420, 510], [490, 455], [560, 480], [630, 420],
     [700, 440], [770, 380], [840, 405], [910, 340], [980, 360], [1080, 300],
@@ -205,13 +230,13 @@ export function IgBackground({ id }: { id: string }) {
     <g>
       <defs>
         <linearGradient id={`${id}-bg`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#0A1B2C" />
+          <stop offset="0" stopColor={IG.bgTop} />
           <stop offset="0.55" stopColor={IG.bg} />
-          <stop offset="1" stopColor="#050E18" />
+          <stop offset="1" stopColor={IG.bgBot} />
         </linearGradient>
         <radialGradient id={`${id}-glow`} cx="0.5" cy="1.02" r="0.62">
-          <stop offset="0" stopColor="#1F8BFF" stopOpacity="0.38" />
-          <stop offset="0.45" stopColor="#0E4F8A" stopOpacity="0.16" />
+          <stop offset="0" stopColor={IG.glow1} stopOpacity="0.38" />
+          <stop offset="0.45" stopColor={IG.glow2} stopOpacity="0.16" />
           <stop offset="1" stopColor={IG.bg} stopOpacity="0" />
         </radialGradient>
         <radialGradient id={`${id}-top`} cx="0.85" cy="0" r="0.6">
@@ -219,17 +244,17 @@ export function IgBackground({ id }: { id: string }) {
           <stop offset="1" stopColor={IG.bg} stopOpacity="0" />
         </radialGradient>
         <clipPath id={`${id}-globe`}>
-          <circle cx={540} cy={1560} r={560} />
+          <circle cx={540} cy={h + 210} r={560} />
         </clipPath>
       </defs>
-      <rect width={IG_W} height={IG_H} fill={`url(#${id}-bg)`} />
-      <rect width={IG_W} height={IG_H} fill={`url(#${id}-top)`} />
+      <rect width={IG_W} height={h} fill={`url(#${id}-bg)`} />
+      <rect width={IG_W} height={h} fill={`url(#${id}-top)`} />
       {/* faint grid */}
       <g stroke="#FFFFFF" strokeOpacity="0.035" strokeWidth={1}>
         {Array.from({ length: 12 }, (_, i) => (
-          <line key={`v${i}`} x1={i * 90 + 45} x2={i * 90 + 45} y1={0} y2={IG_H} />
+          <line key={`v${i}`} x1={i * 90 + 45} x2={i * 90 + 45} y1={0} y2={h} />
         ))}
-        {Array.from({ length: 15 }, (_, i) => (
+        {Array.from({ length: Math.ceil(h / 90) }, (_, i) => (
           <line key={`h${i}`} x1={0} x2={IG_W} y1={i * 90 + 45} y2={i * 90 + 45} />
         ))}
       </g>
@@ -243,16 +268,16 @@ export function IgBackground({ id }: { id: string }) {
         strokeLinejoin="round"
       />
       {/* globe */}
-      <rect width={IG_W} height={IG_H} fill={`url(#${id}-glow)`} />
-      <g clipPath={`url(#${id}-globe)`} fill="none" stroke="#5FB2FF" strokeOpacity="0.16" strokeWidth={1.5}>
+      <rect width={IG_W} height={h} fill={`url(#${id}-glow)`} />
+      <g clipPath={`url(#${id}-globe)`} fill="none" stroke={IG.globe} strokeOpacity="0.16" strokeWidth={1.5}>
         {[0, 1, 2, 3, 4, 5].map((k) => (
-          <ellipse key={`lat${k}`} cx={540} cy={1560} rx={560} ry={560 - k * 95} />
+          <ellipse key={`lat${k}`} cx={540} cy={h + 210} rx={560} ry={560 - k * 95} />
         ))}
         {[0, 1, 2, 3, 4, 5].map((k) => (
-          <ellipse key={`lon${k}`} cx={540} cy={1560} rx={80 + k * 96} ry={560} />
+          <ellipse key={`lon${k}`} cx={540} cy={h + 210} rx={80 + k * 96} ry={560} />
         ))}
       </g>
-      <circle cx={540} cy={1560} r={560} fill="none" stroke="#5FB2FF" strokeOpacity="0.28" strokeWidth={2} />
+      <circle cx={540} cy={h + 210} r={560} fill="none" stroke={IG.globe} strokeOpacity="0.28" strokeWidth={2} />
     </g>
   );
 }
@@ -268,6 +293,7 @@ export function IgLogo({ variant = "horizontal", x = 55, y = 43, height = 92 }: 
 
 /** Rounded date pill with a calendar icon, right-aligned at `right`. */
 export function IgDatePill({ right, y, text }: { right: number; y: number; text: string }) {
+  const IG = useIg();
   const label = text || "—";
   const w = Math.max(150, label.length * 12.5 + 90);
   const x = right - w;
@@ -311,6 +337,7 @@ export function IgSentimentBadge({ x, y, w, h, sentiment }: { x: number; y: numb
 }
 
 export function IgFooter({ left, page }: { left: string; page: string }) {
+  const IG = useIg();
   return (
     <g>
       <text x={60} y={1290} fill={IG.muted} fontFamily={IG.font} fontSize={22} fontWeight={600}>
@@ -330,6 +357,7 @@ export function IgFooter({ left, page }: { left: string; page: string }) {
 
 /** Round icon tile used on the market cards. */
 export function IgIconTile({ x, y, size, children }: { x: number; y: number; size: number; children: ReactNode }) {
+  const IG = useIg();
   return (
     <g transform={`translate(${x} ${y})`}>
       <circle cx={size / 2} cy={size / 2} r={size / 2} fill={IG.card2} stroke={IG.border} strokeWidth={2} />
