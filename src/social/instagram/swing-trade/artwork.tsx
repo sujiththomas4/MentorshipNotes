@@ -1,7 +1,7 @@
 import { forwardRef, type ReactNode } from "react";
 import { IG, IG_LOGOS, IG_W, fitFont, wrapText } from "@/social/instagram/kit";
 import { igSpread } from "@/social/instagram/layout";
-import { chartPlacement, inr, num, type SwingTradeData } from "./data";
+import { chartPlacement, inr, num, type SwingBase, type SwingTradeData } from "./data";
 
 /*
  * Swing Trade post, ported from swing-trade.html to SVG at 1080 × 1350 (same coordinates as
@@ -69,7 +69,7 @@ const DARK: Palette = {
 export const PALETTES: Record<string, Palette> = { light: LIGHT, navy: DARK };
 
 /** Section shifts for the chosen format (the editor uses `chartDy` for dragging the chart). */
-export function swingLayout(d: SwingTradeData) {
+export function swingLayout(d: SwingBase) {
   // header above 140; body: title | info row | chart | direction + levels | bottom card; footer from 1270
   const sp = igSpread(d.layout, 140, 1270, [380, 488, 996, 1125]);
   return { ...sp, chartDy: sp.dy(2) };
@@ -85,7 +85,7 @@ export function formatDate(iso: string) {
 
 /* ---------------- icons (64 × 64, from the HTML) ---------------- */
 
-export type IconName = "calendar" | "chart" | "tag" | "price" | "entry" | "target" | "stop" | "bulb" | "risk";
+export type IconName = "calendar" | "chart" | "tag" | "price" | "entry" | "target" | "stop" | "bulb" | "risk" | "factory" | "pie" | "percent" | "people";
 
 export function Icon({ name, x, y, size, color }: { name: IconName; x: number; y: number; size: number; color: string }) {
   const s = { stroke: color, fill: "none", strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
@@ -153,6 +153,33 @@ export function Icon({ name, x, y, size, color }: { name: IconName; x: number; y
         <path d="M7 34a9 6 0 0 0 18 0M39 34a9 6 0 0 0 18 0" strokeWidth={4} {...s} />
         <path d="M22 56h20" strokeWidth={4} {...s} />
         <circle cx={32} cy={10} r={3} fill={color} />
+      </>
+    ),
+    factory: (
+      <>
+        <path d="M8 56V30l14 9V30l14 9V30l14 9V10h8v46z" strokeWidth={4} {...s} />
+        <path d="M6 56h52M18 48h6M30 48h6M42 48h6" strokeWidth={4} {...s} />
+      </>
+    ),
+    pie: (
+      <>
+        <path d="M28 12a22 22 0 1 0 24 24H28z" strokeWidth={4} {...s} />
+        <path d="M36 4a22 22 0 0 1 24 24H36z" strokeWidth={4} {...s} />
+      </>
+    ),
+    percent: (
+      <>
+        <path d="M50 12L14 52" strokeWidth={5} {...s} />
+        <circle cx={18} cy={18} r={8} strokeWidth={4} {...s} />
+        <circle cx={46} cy={46} r={8} strokeWidth={4} {...s} />
+      </>
+    ),
+    people: (
+      <>
+        <circle cx={24} cy={20} r={9} strokeWidth={4} {...s} />
+        <path d="M6 54c0-10 8-17 18-17s18 7 18 17" strokeWidth={4} {...s} />
+        <circle cx={44} cy={18} r={7} strokeWidth={3.5} {...s} />
+        <path d="M46 33c7 1 12 7 12 15" strokeWidth={3.5} {...s} />
       </>
     ),
   };
@@ -379,8 +406,50 @@ function IllustrativeChart({ d, tag, C }: { d: SwingTradeData; tag: boolean; C: 
 
 /* ---------------- post ---------------- */
 
+/** One labelled value on the post (icon colour `ic`, value colour `vc`; default: theme). */
+export type SwingCell = { icon: IconName; label: string; value: string; ic?: string; vc?: string };
+/** What differs between posts in the Swing Trade style; the frame draws everything else. */
+export type SwingSlots = {
+  ariaLabel: string;
+  /** text on the brush banner under the title */
+  banner: string;
+  /** drawn in the chart box (1001 × 484) when no chart image is set */
+  chartFallback: ReactNode;
+  /** the four boxes right of the BUY / SELL box */
+  levels: [SwingCell, SwingCell, SwingCell, SwingCell];
+  /** bottom card, second box (the first is the time frame) */
+  setup: SwingCell;
+  /** bottom card, wide third box: bullet lines, or one value with a small caption */
+  key: { icon: IconName; label: string; lines?: string[]; value?: string; caption?: string };
+  /** bottom card, green last box */
+  last: SwingCell;
+};
+
 export const SwingTradeArtwork = forwardRef<SVGSVGElement, { data: SwingTradeData; className?: string }>(function SwingTradeArtwork({ data: d, className }, ref) {
+  return <SwingFrame ref={ref} d={d} className={className} slots={(C) => tradeSlots(d, C)} />;
+});
+
+function tradeSlots(d: SwingTradeData, C: Palette): SwingSlots {
+  return {
+    ariaLabel: `Swing trade ${d.direction} ${d.ticker}`,
+    banner: "TRADE SETUP",
+    chartFallback: <IllustrativeChart d={d} tag={d.illustrativeTag} C={C} />,
+    levels: [
+      { icon: "entry", label: "ENTRY PRICE", value: inr(d.entryPrice) },
+      { icon: "target", label: "TARGET 1", value: inr(d.target1), ic: C.emerald },
+      { icon: "target", label: "TARGET 2", value: inr(d.target2), ic: C.emerald },
+      { icon: "stop", label: "STOP LOSS", value: inr(d.stopLoss), ic: C.red, vc: C.red },
+    ],
+    setup: { icon: "chart", label: "TRADE SETUP", value: d.setup.trim() || "—" },
+    key: { icon: "bulb", label: "KEY REASON", lines: d.reason },
+    last: { icon: "risk", label: "RISK / REWARD", value: d.riskReward.trim() || "—" },
+  };
+}
+
+/** The Swing Trade post: header, title, info row, chart, direction + levels, bottom card, footer. */
+export const SwingFrame = forwardRef<SVGSVGElement, { d: SwingBase; slots: (C: Palette) => SwingSlots; className?: string }>(function SwingFrame({ d, slots, className }, ref) {
   const C = PALETTES[d.layout.theme] ?? LIGHT;
+  const S = slots(C);
   const L = swingLayout(d);
   const at = (i: number) => `translate(0 ${L.dy(i)})`;
   const buy = d.direction !== "SELL";
@@ -408,16 +477,11 @@ export const SwingTradeArtwork = forwardRef<SVGSVGElement, { data: SwingTradeDat
     { w: 282, icon: "tag" as const, label: "TICKER", value: d.ticker.trim() || "—" },
     { w: 282, icon: "price" as const, label: "CURRENT PRICE", value: inr(d.currentPrice) },
   ];
-  const levels = [
-    { icon: "entry" as const, label: "ENTRY PRICE", value: inr(d.entryPrice), ic: C.icon, vc: C.strong },
-    { icon: "target" as const, label: "TARGET 1", value: inr(d.target1), ic: C.emerald, vc: C.strong },
-    { icon: "target" as const, label: "TARGET 2", value: inr(d.target2), ic: C.emerald, vc: C.strong },
-    { icon: "stop" as const, label: "STOP LOSS", value: inr(d.stopLoss), ic: C.red, vc: C.red },
-  ];
+  const levels = S.levels.map((l) => ({ ...l, ic: l.ic ?? C.icon, vc: l.vc ?? C.strong }));
 
   // key reasons: up to 4 wrapped lines
   const reasonLines: { text: string; bullet: boolean }[] = [];
-  for (const rsn of d.reason.map((x) => x.trim()).filter(Boolean)) {
+  for (const rsn of (S.key.lines ?? []).map((x) => x.trim()).filter(Boolean)) {
     wrapText(rsn, 29, 4).forEach((line, i) => reasonLines.push({ text: line, bullet: i === 0 }));
   }
   const shownReasons = reasonLines.slice(0, 4);
@@ -444,7 +508,7 @@ export const SwingTradeArtwork = forwardRef<SVGSVGElement, { data: SwingTradeDat
       xmlns="http://www.w3.org/2000/svg"
       className={className}
       role="img"
-      aria-label={`Swing trade ${d.direction} ${d.ticker}`}
+      aria-label={S.ariaLabel}
     >
       <defs>
         <linearGradient id="st-bg" x1="0" y1="0" x2="0" y2="1">
@@ -525,8 +589,8 @@ export const SwingTradeArtwork = forwardRef<SVGSVGElement, { data: SwingTradeDat
           <path d="M36 101 C200 104 420 98 572 96" stroke={C.banner} strokeWidth={3} strokeLinecap="round" opacity={0.6} fill="none" />
           <path d="M600 30 L636 28 M596 60 L632 58 M594 80 L620 82" stroke={C.banner} strokeWidth={2.5} strokeLinecap="round" opacity={0.55} fill="none" />
         </g>
-        <text x={84} y={328} {...t(55, 900, "#fff")} letterSpacing={-0.5}>
-          TRADE SETUP
+        <text x={84} y={328} {...t(Math.min(55, fitFont(S.banner, 400, 55, 30)), 900, "#fff")} letterSpacing={-0.5}>
+          {S.banner}
         </text>
         <g transform="translate(500 292)" fill="#fff">
           <rect x={0} y={24} width={10} height={16} rx={1.5} />
@@ -562,7 +626,7 @@ export const SwingTradeArtwork = forwardRef<SVGSVGElement, { data: SwingTradeDat
             </g>
           ) : (
             <svg x={40} y={497} width={W} height={H} viewBox={`0 0 ${W} ${H}`}>
-              <IllustrativeChart d={d} tag={d.illustrativeTag} C={C} />
+              {S.chartFallback}
             </svg>
           )}
         </g>
@@ -608,22 +672,34 @@ export const SwingTradeArtwork = forwardRef<SVGSVGElement, { data: SwingTradeDat
         <line x1={bx[2]} x2={bx[2]} y1={1150} y2={1242} stroke={C.border} strokeWidth={1.5} />
         {[
           { x0: bx[0], w: bottomW[0], icon: "calendar" as const, label: "TIME FRAME", value: d.timeframe.trim() || "—" },
-          { x0: bx[1], w: bottomW[1], icon: "chart" as const, label: "TRADE SETUP", value: d.setup.trim() || "—" },
+          { x0: bx[1], w: bottomW[1], ...S.setup },
         ].map((c) => (
           <g key={c.label}>
-            <Icon name={c.icon} x={c.x0 + 24} y={1161} size={34} color={C.icon} />
+            <Icon name={c.icon} x={c.x0 + 24} y={1161} size={34} color={c.ic ?? C.icon} />
             <text x={c.x0 + 73} y={1175} {...t(14.5, 600, C.label)} letterSpacing={0.4}>
               {c.label}
             </text>
-            <text x={c.x0 + 73} y={1208} {...t(fitFont(c.value, c.w - 73 - 16, 23, 14), 800, C.strong)}>
+            <text x={c.x0 + 73} y={1208} {...t(fitFont(c.value, c.w - 73 - 16, 23, 14), 800, c.vc ?? C.strong)}>
               {c.value}
             </text>
           </g>
         ))}
-        <Icon name="bulb" x={bx[2] + 24} y={1161} size={34} color={C.icon} />
+        <Icon name={S.key.icon} x={bx[2] + 24} y={1161} size={34} color={C.icon} />
         <text x={bx[2] + 73} y={1175} {...t(14.5, 600, C.label)} letterSpacing={0.4}>
-          KEY REASON
+          {S.key.label}
         </text>
+        {S.key.value !== undefined && (
+          <g>
+            <text x={bx[2] + 73} y={1212} {...t(fitFont(S.key.value || "—", bottomW[2] - 73 - 16, 27, 14), 800, C.strong)}>
+              {S.key.value || "—"}
+            </text>
+            {S.key.caption && (
+              <text x={bx[2] + 73} y={1236} {...t(fitFont(S.key.caption, bottomW[2] - 73 - 20, 13.5, 10), 600, C.label)}>
+                {S.key.caption}
+              </text>
+            )}
+          </g>
+        )}
         {shownReasons.map((l, i) => (
           <g key={i}>
             {l.bullet && <circle cx={bx[2] + 77} cy={1191 + i * 19} r={2.6} fill={C.body} />}
@@ -632,18 +708,28 @@ export const SwingTradeArtwork = forwardRef<SVGSVGElement, { data: SwingTradeDat
             </text>
           </g>
         ))}
-        {!shownReasons.length && (
+        {!shownReasons.length && S.key.value === undefined && (
           <text x={bx[2] + 73} y={1208} {...t(23, 800, C.strong)}>
             —
           </text>
         )}
         <rect x={bx[3] + 6} y={1146} width={bottomW[3] - 18} height={100} rx={14} fill={C.risk} />
-        <Icon name="risk" x={bx[3] + 22} y={1176} size={40} color={C.emerald} />
-        <text x={bx[3] + 76} y={1180} {...t(14.5, 600, C.label)} letterSpacing={0.4}>
-          RISK / REWARD
-        </text>
-        <text x={bx[3] + 76} y={1218} {...t(fitFont(d.riskReward.trim() || "—", bottomW[3] - 76 - 16, 31, 16), 800, C.strong)}>
-          {d.riskReward.trim() || "—"}
+        <Icon name={S.last.icon} x={bx[3] + 22} y={1176} size={40} color={S.last.ic ?? C.emerald} />
+        {S.last.label.length > 13 && S.last.label.includes(" ") ? (
+          // a long label goes on two lines
+          <text x={bx[3] + 76} y={1168} {...t(13.5, 600, C.label)} letterSpacing={0.4}>
+            <tspan>{S.last.label.slice(0, S.last.label.lastIndexOf(" "))}</tspan>
+            <tspan x={bx[3] + 76} dy={17}>
+              {S.last.label.slice(S.last.label.lastIndexOf(" ") + 1)}
+            </tspan>
+          </text>
+        ) : (
+          <text x={bx[3] + 76} y={1180} {...t(14.5, 600, C.label)} letterSpacing={0.4}>
+            {S.last.label}
+          </text>
+        )}
+        <text x={bx[3] + 76} y={1218} {...t(fitFont(S.last.value, bottomW[3] - 76 - 16, 31, 16), 800, S.last.vc ?? C.strong)}>
+          {S.last.value}
         </text>
       </g>
 

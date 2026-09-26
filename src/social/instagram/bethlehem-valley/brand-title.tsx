@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef } from "react";
+import { useLayoutEffect, useRef, type CSSProperties, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { Check, Field, Panel, Seg, inputCls, type Setter } from "./editor-kit";
 import "./brand-title.css";
@@ -8,7 +8,7 @@ import "./brand-title.css";
  * (Ideas Cover, Tips List). Several styles; the text shrinks to fit the space next to the logo.
  */
 
-export type BrandTitleStyle = "off" | "classic" | "script" | "bold" | "ribbon" | "stacked" | "malayalam";
+export type BrandTitleStyle = "off" | "classic" | "script" | "bold" | "ribbon" | "stacked" | "malayalam" | "modern";
 export type BrandTitleTone = "forest" | "gold" | "white";
 
 export type BrandTitle = {
@@ -31,6 +31,7 @@ export const BRAND_TITLE_STYLES: [BrandTitleStyle, string][] = [
   ["ribbon", "Ribbon"],
   ["stacked", "Stacked caps"],
   ["malayalam", "Malayalam"],
+  ["modern", "Modern sans"],
 ];
 
 export const BRAND_TITLE_TONES: [BrandTitleTone, string][] = [
@@ -94,9 +95,34 @@ export function BrandTitleView({ t, box }: { t: BrandTitle; box: { left: number;
   }, [t]);
 
   if (t.style === "off") return null;
+  return (
+    <div ref={outer} className={cn("bvbt", `s-${t.style}`, `t-${t.tone}`)} style={{ ...box, position: "absolute" }}>
+      <div ref={inner} className="in" style={{ fontSize: `${t.size / 100}em` }}>
+        {titleBody(t)}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * The name at its natural size in the page flow (no fitting box), for layouts that place it
+ * themselves: `align` sets the text alignment (e.g. right when the name sits left of the logo).
+ */
+export function BrandTitleInline({ t, align = "left", className, style }: { t: BrandTitle; align?: "left" | "center" | "right"; className?: string; style?: CSSProperties }) {
+  if (t.style === "off") return null;
+  return (
+    <div className={cn("bvbt flow", `s-${t.style}`, `t-${t.tone}`, `a-${align}`, className)} style={style}>
+      <div className="in" style={{ fontSize: `${t.size / 100}em` }}>
+        {titleBody(t)}
+      </div>
+    </div>
+  );
+}
+
+function titleBody(t: BrandTitle): ReactNode {
   const tag = t.showTagline && t.tagline.trim() ? t.tagline : "";
   const full = [t.name1, t.name2].filter((s) => s.trim()).join(" ");
-  let body;
+  let body: ReactNode = null;
   switch (t.style) {
     case "classic":
       body = (
@@ -148,6 +174,14 @@ export function BrandTitleView({ t, box }: { t: BrandTitle; box: { left: number;
         </div>
       );
       break;
+    case "modern":
+      body = (
+        <>
+          <div className="n1">{full}</div>
+          {tag && <div className="tg">{tag}</div>}
+        </>
+      );
+      break;
     case "malayalam":
       body = (
         <>
@@ -160,13 +194,7 @@ export function BrandTitleView({ t, box }: { t: BrandTitle; box: { left: number;
       );
       break;
   }
-  return (
-    <div ref={outer} className={cn("bvbt", `s-${t.style}`, `t-${t.tone}`)} style={{ ...box, position: "absolute" }}>
-      <div ref={inner} className="in" style={{ fontSize: `${t.size / 100}em` }}>
-        {body}
-      </div>
-    </div>
-  );
+  return body;
 }
 
 /** Editor panel for a `brandTitle` field. */

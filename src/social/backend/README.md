@@ -6,7 +6,7 @@ moving to Supabase means adding one implementation and switching one line.
 
 | Data | Used by | Today (local) |
 | --- | --- | --- |
-| Content planner (recurring slots, one-off posts, skips / moves, posted ticks) | `planner.ts` | `src/content/social/planner.json` |
+| Content planner (recurring slots, one-off posts, skips / moves, posted ticks, topic ideas) | `planner.ts` | `src/content/social/planner.json` |
 | Saved posts (a planned day's post, prepared ahead) | `saved-posts.tsx` | `src/content/social/posts/<date>/<key>.json` |
 | Photos inside saved posts | `assets.ts` | `public/social/posts/assets/<sha1>.<ext>` |
 | Saved-post previews (360 px WebP) | `saved-posts.tsx` | `public/social/posts/previews/<key>-<stamp>.webp` |
@@ -19,7 +19,7 @@ planner (`social:planner`).
 
 ## Data formats
 
-**Planner** (`planner.json`): `{ version: 1, recurringFrom, slots[], oneOffs[], changes[], posted[] }`,
+**Planner** (`planner.json`): `{ version: 1, recurringFrom, slots[], oneOffs[], changes[], posted[], ideas[] }` (ideas = ad hoc topic ideas; a one-off post scheduled from one carries its `ideaId`),
 see the types at the top of `src/social/planner.ts`. Occurrence keys (used by saved posts and
 `posted`) are `"<slotId>@<yyyy-mm-dd>"` for a recurring slot (the date it originally belongs to,
 kept when moved) and `"once:<id>"` for a one-off post. A template's default days use the slot

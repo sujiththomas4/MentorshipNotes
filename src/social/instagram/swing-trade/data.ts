@@ -14,7 +14,8 @@ export const SWING_THEMES: IgTheme[] = [
   { id: "navy", label: "Dark navy", swatch: ["#0e2239", "#8cb8ea", "#0AA66A"] },
 ];
 
-export type SwingTradeData = {
+/** What every post in the Swing Trade style shares (stock, direction, chart, logo, text, layout). */
+export type SwingBase = {
   /** yyyy-mm-dd */
   date: string;
   stockName: string;
@@ -23,15 +24,7 @@ export type SwingTradeData = {
   /** prices are kept as typed; they are formatted as ₹1,425 on the artwork */
   currentPrice: string;
   direction: Direction;
-  entryPrice: string;
-  target1: string;
-  target2: string;
-  stopLoss: string;
   timeframe: string;
-  setup: string;
-  /** 1–3 short points */
-  reason: string[];
-  riskReward: string;
   /** your chart image (data URL). null = the illustrative chart drawn from the levels */
   chart: string | null;
   /** natural size of the chart image, for positioning (null until known) */
@@ -58,6 +51,17 @@ export type SwingTradeData = {
   layout: IgLayout;
 };
 
+export type SwingTradeData = SwingBase & {
+  entryPrice: string;
+  target1: string;
+  target2: string;
+  stopLoss: string;
+  setup: string;
+  /** 1–3 short points */
+  reason: string[];
+  riskReward: string;
+};
+
 function todayIso() {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -66,20 +70,27 @@ function todayIso() {
 /** Trade values start empty: never invent a trade. */
 export function defaultData(): SwingTradeData {
   return {
+    ...baseDefaults(),
+    entryPrice: "",
+    target1: "",
+    target2: "",
+    stopLoss: "",
+    setup: "",
+    reason: [""],
+    riskReward: "",
+  };
+}
+
+/** Defaults for the shared fields. */
+export function baseDefaults(): SwingBase {
+  return {
     date: todayIso(),
     stockName: "",
     ticker: "",
     exchange: "NSE",
     currentPrice: "",
     direction: "BUY",
-    entryPrice: "",
-    target1: "",
-    target2: "",
-    stopLoss: "",
     timeframe: "Daily",
-    setup: "",
-    reason: [""],
-    riskReward: "",
     chart: null,
     chartSize: null,
     chartFit: "fit",
@@ -132,8 +143,25 @@ function toIso(s: unknown) {
 export function mergeData(raw: Partial<Record<keyof SwingTradeData, unknown>> | null): SwingTradeData {
   const base = defaultData();
   if (!raw) return base;
-  const s = (v: unknown, fallback: string) => (v === undefined || v === null ? fallback : String(v));
   const reason = Array.isArray(raw.reason) ? raw.reason.map(String).slice(0, 3) : raw.reason ? [String(raw.reason)] : base.reason;
+  return {
+    ...mergeBase(raw, base),
+    entryPrice: str(raw.entryPrice, base.entryPrice),
+    target1: str(raw.target1, base.target1),
+    target2: str(raw.target2, base.target2),
+    stopLoss: str(raw.stopLoss, base.stopLoss),
+    setup: str(raw.setup, base.setup),
+    reason: reason.length ? reason : base.reason,
+    riskReward: str(raw.riskReward, base.riskReward),
+  };
+}
+
+/** A saved value as text, or the fallback when missing. */
+export const str = (v: unknown, fallback: string) => (v === undefined || v === null ? fallback : String(v));
+
+/** The shared fields of saved or imported data, missing ones from `base`. */
+export function mergeBase(raw: Partial<Record<keyof SwingBase, unknown>>, base: SwingBase): SwingBase {
+  const s = str;
   const script = Array.isArray(raw.script) && raw.script.length === 3 ? (raw.script.map(String) as [string, string, string]) : base.script;
   return {
     date: raw.date ? toIso(raw.date) : base.date,
@@ -142,14 +170,7 @@ export function mergeData(raw: Partial<Record<keyof SwingTradeData, unknown>> | 
     exchange: s(raw.exchange, base.exchange),
     currentPrice: s(raw.currentPrice, base.currentPrice),
     direction: String(raw.direction).toUpperCase() === "SELL" ? "SELL" : "BUY",
-    entryPrice: s(raw.entryPrice, base.entryPrice),
-    target1: s(raw.target1, base.target1),
-    target2: s(raw.target2, base.target2),
-    stopLoss: s(raw.stopLoss, base.stopLoss),
     timeframe: s(raw.timeframe, base.timeframe),
-    setup: s(raw.setup, base.setup),
-    reason: reason.length ? reason : base.reason,
-    riskReward: s(raw.riskReward, base.riskReward),
     chart: typeof raw.chart === "string" && raw.chart ? raw.chart : null,
     chartSize: isSize(raw.chartSize) ? raw.chartSize : null,
     chartFit: raw.chartFit === "fill" ? "fill" : "fit",

@@ -8,6 +8,7 @@ import {
   ImagePlus,
   Info,
   LayoutTemplate,
+  Lightbulb,
   Radio,
   Star,
 } from "lucide-react";
@@ -75,20 +76,36 @@ function PlatformPage() {
             </h1>
           </div>
         </div>
-        <Link
-          to="/social/$platform/planner"
-          params={{ platform: p.id }}
-          title="Content planner: calendar, times, recurring and one-off posts"
-          className="absolute right-5 top-5 inline-flex items-center gap-3 rounded-2xl bg-white/15 px-4 py-3 text-left ring-1 ring-white/30 backdrop-blur transition hover:bg-white/25 md:right-8 md:top-7"
-        >
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-[#d62976] shadow">
-            <CalendarClock className="h-6 w-6" />
-          </span>
-          <span className="hidden leading-tight sm:block">
-            <span className="block font-display text-base font-bold">Content planner</span>
-            <span className="block text-xs text-white/80">Calendar · times · what posts when</span>
-          </span>
-        </Link>
+        <div className="absolute right-5 top-5 flex gap-2 md:right-8 md:top-7">
+          <Link
+            to="/social/$platform/ideas"
+            params={{ platform: p.id }}
+            title="Topic ideas: ad hoc post and video topics with priority and notes"
+            className="inline-flex items-center gap-3 rounded-2xl bg-white/15 px-4 py-3 text-left ring-1 ring-white/30 backdrop-blur transition hover:bg-white/25"
+          >
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-[#d62976] shadow">
+              <Lightbulb className="h-6 w-6" />
+            </span>
+            <span className="hidden leading-tight lg:block">
+              <span className="block font-display text-base font-bold">Topic ideas</span>
+              <span className="block text-xs text-white/80">Ad hoc topics · P1–P5 · notes</span>
+            </span>
+          </Link>
+          <Link
+            to="/social/$platform/planner"
+            params={{ platform: p.id }}
+            title="Content planner: calendar, times, recurring and one-off posts"
+            className="inline-flex items-center gap-3 rounded-2xl bg-white/15 px-4 py-3 text-left ring-1 ring-white/30 backdrop-blur transition hover:bg-white/25"
+          >
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-[#d62976] shadow">
+              <CalendarClock className="h-6 w-6" />
+            </span>
+            <span className="hidden leading-tight sm:block">
+              <span className="block font-display text-base font-bold">Content planner</span>
+              <span className="block text-xs text-white/80">Calendar · times · what posts when</span>
+            </span>
+          </Link>
+        </div>
         <p className="mt-4 max-w-2xl text-white/90">
           {BRANDS.length} accounts: {BRANDS.map((b) => b.name).join(" and ")}.
           Pick a template, fill in the day's data, and download the post.

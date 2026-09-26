@@ -18,6 +18,8 @@ export const BUILTIN_IMAGES: LibraryItem[] = [
   { id: "landscape", label: "Plantation landscape", src: `${BV_ART}/landscape.webp`, builtin: true },
   { id: "pepper-garden", label: "Pepper garden", src: `${BV_ART}/tips/background.webp`, builtin: true },
   { id: "pepper-farmer", label: "Pepper farmer (cut-out)", src: `${BV_ART}/tips/farmer.webp`, builtin: true },
+  { id: "agri-hen", label: "Hen (agri poster)", src: `${BV_ART}/agri/hen.webp`, builtin: true },
+  { id: "agri-pepper", label: "Pepper clusters (agri poster)", src: `${BV_ART}/agri/pepper-circle.webp`, builtin: true },
 ];
 
 let cache: LibraryItem[] | null = null;

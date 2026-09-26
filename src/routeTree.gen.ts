@@ -22,6 +22,7 @@ import { Route as MentorshipsMentorshipSessionRouteImport } from './routes/mento
 import { Route as MentorshipsMentorshipToCheckRouteImport } from './routes/mentorships/$mentorship/to-check'
 import { Route as SocialPlatformIndexRouteImport } from './routes/social/$platform/index'
 import { Route as SocialPlatformTemplateRouteImport } from './routes/social/$platform/$template'
+import { Route as SocialPlatformIdeasRouteImport } from './routes/social/$platform/ideas'
 import { Route as SocialPlatformPlannerRouteImport } from './routes/social/$platform/planner'
 
 const IndexRoute = IndexRouteImport.update({
@@ -92,6 +93,11 @@ const SocialPlatformTemplateRoute = SocialPlatformTemplateRouteImport.update({
   path: '/social/$platform/$template',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SocialPlatformIdeasRoute = SocialPlatformIdeasRouteImport.update({
+  id: '/social/$platform/ideas',
+  path: '/social/$platform/ideas',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SocialPlatformPlannerRoute = SocialPlatformPlannerRouteImport.update({
   id: '/social/$platform/planner',
   path: '/social/$platform/planner',
@@ -110,6 +116,7 @@ export interface FileRoutesByFullPath {
   '/mentorships/$mentorship/$session': typeof MentorshipsMentorshipSessionRoute
   '/mentorships/$mentorship/to-check': typeof MentorshipsMentorshipToCheckRoute
   '/social/$platform/$template': typeof SocialPlatformTemplateRoute
+  '/social/$platform/ideas': typeof SocialPlatformIdeasRoute
   '/social/$platform/planner': typeof SocialPlatformPlannerRoute
   '/mentorships/$mentorship/': typeof MentorshipsMentorshipIndexRoute
   '/social/$platform/': typeof SocialPlatformIndexRoute
@@ -126,6 +133,7 @@ export interface FileRoutesByTo {
   '/mentorships/$mentorship/$session': typeof MentorshipsMentorshipSessionRoute
   '/mentorships/$mentorship/to-check': typeof MentorshipsMentorshipToCheckRoute
   '/social/$platform/$template': typeof SocialPlatformTemplateRoute
+  '/social/$platform/ideas': typeof SocialPlatformIdeasRoute
   '/social/$platform/planner': typeof SocialPlatformPlannerRoute
   '/mentorships/$mentorship': typeof MentorshipsMentorshipIndexRoute
   '/social/$platform': typeof SocialPlatformIndexRoute
@@ -143,6 +151,7 @@ export interface FileRoutesById {
   '/mentorships/$mentorship/$session': typeof MentorshipsMentorshipSessionRoute
   '/mentorships/$mentorship/to-check': typeof MentorshipsMentorshipToCheckRoute
   '/social/$platform/$template': typeof SocialPlatformTemplateRoute
+  '/social/$platform/ideas': typeof SocialPlatformIdeasRoute
   '/social/$platform/planner': typeof SocialPlatformPlannerRoute
   '/mentorships/$mentorship/': typeof MentorshipsMentorshipIndexRoute
   '/social/$platform/': typeof SocialPlatformIndexRoute
@@ -161,6 +170,7 @@ export interface FileRouteTypes {
     | '/mentorships/$mentorship/$session'
     | '/mentorships/$mentorship/to-check'
     | '/social/$platform/$template'
+    | '/social/$platform/ideas'
     | '/social/$platform/planner'
     | '/mentorships/$mentorship/'
     | '/social/$platform/'
@@ -177,6 +187,7 @@ export interface FileRouteTypes {
     | '/mentorships/$mentorship/$session'
     | '/mentorships/$mentorship/to-check'
     | '/social/$platform/$template'
+    | '/social/$platform/ideas'
     | '/social/$platform/planner'
     | '/mentorships/$mentorship'
     | '/social/$platform'
@@ -193,6 +204,7 @@ export interface FileRouteTypes {
     | '/mentorships/$mentorship/$session'
     | '/mentorships/$mentorship/to-check'
     | '/social/$platform/$template'
+    | '/social/$platform/ideas'
     | '/social/$platform/planner'
     | '/mentorships/$mentorship/'
     | '/social/$platform/'
@@ -210,6 +222,7 @@ export interface RootRouteChildren {
   MentorshipsMentorshipSessionRoute: typeof MentorshipsMentorshipSessionRoute
   MentorshipsMentorshipToCheckRoute: typeof MentorshipsMentorshipToCheckRoute
   SocialPlatformTemplateRoute: typeof SocialPlatformTemplateRoute
+  SocialPlatformIdeasRoute: typeof SocialPlatformIdeasRoute
   SocialPlatformPlannerRoute: typeof SocialPlatformPlannerRoute
   MentorshipsMentorshipIndexRoute: typeof MentorshipsMentorshipIndexRoute
   SocialPlatformIndexRoute: typeof SocialPlatformIndexRoute
@@ -308,6 +321,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SocialPlatformTemplateRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/social/$platform/ideas': {
+      id: '/social/$platform/ideas'
+      path: '/social/$platform/ideas'
+      fullPath: '/social/$platform/ideas'
+      preLoaderRoute: typeof SocialPlatformIdeasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/social/$platform/planner': {
       id: '/social/$platform/planner'
       path: '/social/$platform/planner'
@@ -330,6 +350,7 @@ const rootRouteChildren: RootRouteChildren = {
   MentorshipsMentorshipSessionRoute: MentorshipsMentorshipSessionRoute,
   MentorshipsMentorshipToCheckRoute: MentorshipsMentorshipToCheckRoute,
   SocialPlatformTemplateRoute: SocialPlatformTemplateRoute,
+  SocialPlatformIdeasRoute: SocialPlatformIdeasRoute,
   SocialPlatformPlannerRoute: SocialPlatformPlannerRoute,
   MentorshipsMentorshipIndexRoute: MentorshipsMentorshipIndexRoute,
   SocialPlatformIndexRoute: SocialPlatformIndexRoute,

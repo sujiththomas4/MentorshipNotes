@@ -439,6 +439,77 @@ export function PreviewCard<T extends FileFields>({ data, msg, onMsg, render }: 
   );
 }
 
+/**
+ * One 2-D control for a position: drag the dot (or click) anywhere in the pad; arrow keys nudge
+ * (Shift = bigger steps). `x` / `y` are 0–100; `image` shows the photo behind the pad.
+ */
+export function PositionPad({
+  x,
+  y,
+  onChange,
+  image,
+  aspect = 1,
+  label,
+  onCenter,
+}: {
+  x: number;
+  y: number;
+  onChange: (x: number, y: number) => void;
+  image?: string | null;
+  /** width / height of the pad */
+  aspect?: number;
+  label: string;
+  onCenter?: () => void;
+}) {
+  const pad = useRef<HTMLDivElement>(null);
+  const clamp = (v: number) => Math.round(Math.min(100, Math.max(0, v)));
+  const at = (e: { clientX: number; clientY: number }) => {
+    const r = pad.current!.getBoundingClientRect();
+    onChange(clamp(((e.clientX - r.left) / r.width) * 100), clamp(((e.clientY - r.top) / r.height) * 100));
+  };
+  return (
+    <div className="flex items-start gap-3">
+      <div
+        ref={pad}
+        role="slider"
+        tabIndex={0}
+        aria-label={label}
+        aria-valuetext={`${x}% across, ${y}% down`}
+        onPointerDown={(e) => {
+          e.currentTarget.setPointerCapture(e.pointerId);
+          at(e);
+        }}
+        onPointerMove={(e) => e.currentTarget.hasPointerCapture(e.pointerId) && at(e)}
+        onKeyDown={(e) => {
+          const s = e.shiftKey ? 10 : 2;
+          const d = { ArrowLeft: [-s, 0], ArrowRight: [s, 0], ArrowUp: [0, -s], ArrowDown: [0, s] }[e.key];
+          if (!d) return;
+          e.preventDefault();
+          onChange(clamp(x + d[0]), clamp(y + d[1]));
+        }}
+        className="relative shrink-0 cursor-crosshair touch-none overflow-hidden rounded-lg border border-border bg-secondary bg-cover bg-center outline-none focus-visible:ring-2 focus-visible:ring-accent"
+        style={{ aspectRatio: String(aspect), width: aspect >= 1 ? 170 : Math.round(200 * aspect), backgroundImage: image ? `url("${image}")` : undefined }}
+      >
+        <span className="pointer-events-none absolute inset-0 bg-white/30" />
+        <span className="pointer-events-none absolute left-1/2 top-0 h-full w-px bg-black/20" />
+        <span className="pointer-events-none absolute left-0 top-1/2 h-px w-full bg-black/20" />
+        <span className="pointer-events-none absolute h-5 w-5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-[#0A3A20] shadow" style={{ left: `${x}%`, top: `${y}%` }} />
+      </div>
+      <div className="space-y-2 text-xs text-muted-foreground">
+        <p>{label}: drag the dot, or use the arrow keys.</p>
+        <p className="font-mono">
+          {x}% · {y}%
+        </p>
+        {onCenter && (
+          <button type="button" onClick={onCenter} className={cn(btn, "px-2 py-1 text-xs")}>
+            Center
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 /** Logo picker: square tiles on the brand green. */
 export function LogoPicker<V extends string | number>({ options, value, onChange }: { options: { v: V; src: string; label: string }[]; value: V; onChange: (v: V) => void }) {
   return (

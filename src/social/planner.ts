@@ -9,6 +9,7 @@ import type { Weekday } from "@/social/schedule";
  *   changes  - one occurrence of a slot skipped or moved to another date / time
  *   posted   - occurrences ticked as posted
  *   recurringFrom - recurring slots start on this date (a slot's own "from" overrides it)
+ *   ideas    - ad hoc topic ideas (priority P1–P5, notes); scheduling one adds a one-off post
  * A template without any slot uses its registry default days (no time) until you add one.
  * Saved through the social backend (today: src/content/social/planner.json via the dev server);
  * the browser keeps a copy.
@@ -24,8 +25,34 @@ export type RecurringSlot = {
   /** yyyy-mm-dd this slot starts on; "" = the plan's recurringFrom */
   from: string;
 };
-export type OneOffPost = { id: string; templateId: string; date: string; time: string; note: string };
+export type OneOffPost = {
+  id: string;
+  templateId: string;
+  date: string;
+  time: string;
+  note: string;
+  /** the topic idea this post was scheduled from */
+  ideaId?: string;
+};
 export type SlotChange = { slotId: string; date: string; skip?: boolean; toDate?: string; toTime?: string };
+export type Priority = 1 | 2 | 3 | 4 | 5;
+/** idea = still thinking, final = ready to schedule, done = finished with it */
+export type IdeaStatus = "idea" | "final" | "done";
+export type TopicIdea = {
+  id: string;
+  title: string;
+  /** 1 = P1 (highest) … 5 = P5 */
+  priority: Priority;
+  status: IdeaStatus;
+  /** brand id, "" = any account */
+  brand: string;
+  /** templates this topic can be posted with; [] = any */
+  templates: string[];
+  /** multiline: video references, key points … */
+  notes: string;
+  /** yyyy-mm-dd */
+  created: string;
+};
 export type Planner = {
   version: 1;
   /** yyyy-mm-dd all recurring slots start on (unless a slot sets its own); "" = no start date */
@@ -34,6 +61,8 @@ export type Planner = {
   oneOffs: OneOffPost[];
   changes: SlotChange[];
   posted: string[];
+  /** ad hoc topic ideas; scheduling one adds a one-off post with its ideaId */
+  ideas: TopicIdea[];
 };
 
 export type PlanTemplate = { id: string; title: string; brand: string; schedule: { days: Weekday[] } };
@@ -48,6 +77,8 @@ export type Occurrence = {
   kind: "recurring" | "once";
   slotId?: string;
   oneOffId?: string;
+  /** topic idea a one-off post was scheduled from */
+  ideaId?: string;
   /** date the recurring occurrence originally belonged to */
   from?: string;
   moved?: boolean;
@@ -57,7 +88,7 @@ export type Occurrence = {
   posted: boolean;
 };
 
-export const EMPTY_PLANNER: Planner = { version: 1, recurringFrom: "", slots: [], oneOffs: [], changes: [], posted: [] };
+export const EMPTY_PLANNER: Planner = { version: 1, recurringFrom: "", slots: [], oneOffs: [], changes: [], posted: [], ideas: [] };
 
 export const planId = () => `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
 
@@ -147,7 +178,7 @@ export function occurrencesOn(date: string, p: Planner, templates: PlanTemplate[
   for (const o of p.oneOffs) {
     if (o.date !== date || !known.has(o.templateId)) continue;
     const key = `once:${o.id}`;
-    out.push({ key, templateId: o.templateId, date, time: o.time, note: o.note, kind: "once", oneOffId: o.id, posted: posted.has(key) });
+    out.push({ key, templateId: o.templateId, date, time: o.time, note: o.note, kind: "once", oneOffId: o.id, ideaId: o.ideaId, posted: posted.has(key) });
   }
   return out.sort((a, b) => timeKey(a.time).localeCompare(timeKey(b.time)));
 }
@@ -188,7 +219,14 @@ function clean(raw: unknown): Planner {
       active: s.active !== false,
       from: date(s.from),
     })),
-    oneOffs: (Array.isArray(r.oneOffs) ? r.oneOffs : []).map((o) => ({ id: str(o.id) || planId(), templateId: str(o.templateId), date: str(o.date), time: str(o.time), note: str(o.note) })),
+    oneOffs: (Array.isArray(r.oneOffs) ? r.oneOffs : []).map((o) => ({
+      id: str(o.id) || planId(),
+      templateId: str(o.templateId),
+      date: str(o.date),
+      time: str(o.time),
+      note: str(o.note),
+      ...(o.ideaId ? { ideaId: str(o.ideaId) } : {}),
+    })),
     changes: (Array.isArray(r.changes) ? r.changes : []).map((c) => ({
       slotId: str(c.slotId),
       date: str(c.date),
@@ -197,6 +235,16 @@ function clean(raw: unknown): Planner {
       ...(c.toTime ? { toTime: str(c.toTime) } : {}),
     })),
     posted: (Array.isArray(r.posted) ? r.posted : []).filter((k): k is string => typeof k === "string"),
+    ideas: (Array.isArray(r.ideas) ? r.ideas : []).map((i) => ({
+      id: str(i.id) || planId(),
+      title: str(i.title),
+      priority: ([1, 2, 3, 4, 5].includes(i.priority) ? i.priority : 3) as Priority,
+      status: (["idea", "final", "done"].includes(i.status) ? i.status : "idea") as IdeaStatus,
+      brand: str(i.brand),
+      templates: (Array.isArray(i.templates) ? i.templates : []).filter((t): t is string => typeof t === "string"),
+      notes: str(i.notes),
+      created: date(i.created),
+    })),
   };
 }
 

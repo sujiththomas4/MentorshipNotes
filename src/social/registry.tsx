@@ -6,6 +6,9 @@ import { GlobalMarketEditor } from "@/social/instagram/global-market/editor";
 import { SwingTradeArtwork } from "@/social/instagram/swing-trade/artwork";
 import { exampleData as swingExample } from "@/social/instagram/swing-trade/data";
 import { SwingTradeEditor } from "@/social/instagram/swing-trade/editor";
+import { SwingFundamentalsArtwork } from "@/social/instagram/swing-fundamentals/artwork";
+import { exampleData as swingFundamentalsExample } from "@/social/instagram/swing-fundamentals/data";
+import { SwingFundamentalsEditor } from "@/social/instagram/swing-fundamentals/editor";
 import type { Schedule } from "@/social/schedule";
 import type { BrandId } from "@/branding/brands";
 import { OptionSellingArtwork } from "@/social/instagram/option-selling/artwork";
@@ -38,6 +41,12 @@ import { TipsListEditor } from "@/social/instagram/bethlehem-valley/tips-list/ed
 import { IdeasCoverArtwork } from "@/social/instagram/bethlehem-valley/ideas-cover/artwork";
 import { sampleData as ideasCoverSample } from "@/social/instagram/bethlehem-valley/ideas-cover/data";
 import { IdeasCoverEditor } from "@/social/instagram/bethlehem-valley/ideas-cover/editor";
+import { AgriPromoArtwork } from "@/social/instagram/bethlehem-valley/agri-promo/artwork";
+import { sampleData as agriPromoSample } from "@/social/instagram/bethlehem-valley/agri-promo/data";
+import { AgriPromoEditor } from "@/social/instagram/bethlehem-valley/agri-promo/editor";
+import { AzollaSlide } from "@/social/instagram/bethlehem-valley/azolla/artwork";
+import { sampleData as azollaSample } from "@/social/instagram/bethlehem-valley/azolla/data";
+import { AzollaEditor } from "@/social/instagram/bethlehem-valley/azolla/editor";
 import { BvPageArtwork } from "@/social/instagram/bethlehem-valley/pages/artwork";
 import { PRESETS } from "@/social/instagram/bethlehem-valley/pages/data";
 import { BvPagesEditor } from "@/social/instagram/bethlehem-valley/pages/editor";
@@ -99,6 +108,16 @@ export const PLATFORMS: SocialPlatform[] = [
         brand: "indian-traders",
         Editor: SwingTradeEditor,
         Thumbnail: () => <SwingTradeArtwork data={swingExample()} className="block h-auto w-full" />,
+      },
+      {
+        id: "Instagram_SwingTradeFundamentals",
+        title: "Swing Trade without Target and Stop Loss",
+        description: "Swing Trade style post with the stock's fundamentals instead of trade levels: sector, market cap, sales, ROCE, net profit, company PE vs industry PE and promoter holding, with BUY/SELL direction and your chart.",
+        size: { w: 1080, h: 1350, label: "1080 × 1350 feed · or 1080 × 1920 story" },
+        schedule: { days: [], note: "weekly / occasional" },
+        brand: "indian-traders",
+        Editor: SwingFundamentalsEditor,
+        Thumbnail: () => <SwingFundamentalsArtwork data={swingFundamentalsExample()} className="block h-auto w-full" />,
       },
       {
         id: "Instagram_WeeklyOptionSelling",
@@ -298,6 +317,36 @@ export const PLATFORMS: SocialPlatform[] = [
         Thumbnail: () => (
           <Scaled w={1080} h={1350}>
             <IdeasCoverArtwork data={ideasCoverSample()} />
+          </Scaled>
+        ),
+      },
+      {
+        id: "Instagram_BV_AgriPromo",
+        title: "Agri Promotion Poster",
+        description:
+          "Advertising poster for any farm business (poultry, goat, dairy, pepper, vegetables, nursery…): hero photo with a curved edge, logo, three-line headline, description, yellow button, green feature banner, round secondary photo, four benefits with icons and a five-icon footer band. Photos, copy and icons are all replaceable; quick-fill benefit sets per business.",
+        size: { w: 1080, h: 1350, label: "1080 × 1350 feed · or 1080 × 1920 story" },
+        schedule: { days: [], note: "posting days not set yet" },
+        brand: "bethlehem-valley",
+        Editor: AgriPromoEditor,
+        Thumbnail: () => (
+          <Scaled w={1080} h={1350}>
+            <AgriPromoArtwork data={agriPromoSample()} />
+          </Scaled>
+        ),
+      },
+      {
+        id: "Instagram_BV_Azolla",
+        title: "Azolla for Poultry (Carousel)",
+        description:
+          "6-slide dark-navy carousel on cutting poultry feed cost with Azolla: hook (feed is 60–70% of the cost), what Azolla is, why it helps the birds, how fast it grows (Day 1 → full mat), a savings calculator with before / after bars from your own numbers, and a Comment “AZOLLA” call to action. Every text and photo is editable; slides can be left out; download all at once.",
+        size: { w: 1080, h: 1350, label: "1080 × 1350 feed · 6-slide carousel" },
+        schedule: { days: [], note: "posting days not set yet" },
+        brand: "bethlehem-valley",
+        Editor: AzollaEditor,
+        Thumbnail: () => (
+          <Scaled w={1080} h={1350}>
+            <AzollaSlide data={azollaSample()} slide={0} n={1} total={6} />
           </Scaled>
         ),
       },

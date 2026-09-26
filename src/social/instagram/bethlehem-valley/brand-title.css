@@ -39,3 +39,13 @@
 /* malayalam name with the English name under it */
 .bvbt.s-malayalam .n1{font-size:.95em;line-height:1.3}
 .bvbt.s-malayalam .spaced{font-family:"BV DM Sans",Arial,sans-serif;font-weight:700;font-size:.3em;letter-spacing:.35em;text-transform:uppercase;color:var(--accent)}
+
+/* modern: one-line sans name (Poppins) with a spaced tagline */
+.bvbt.s-modern .n1{font-family:"BV Poppins","BV Noto Sans Malayalam",Arial,sans-serif;font-weight:700;font-size:.5em;line-height:1.05}
+.bvbt.s-modern .tg{margin-top:.5em;font-family:"BV Poppins",Arial,sans-serif;font-weight:500;font-size:.2em;letter-spacing:.3em}
+
+/* in the page flow (BrandTitleInline): natural size, no fitting box */
+.bvbt.flow{position:relative}
+.bvbt.flow .in{position:static;transform:none;width:max-content}
+.bvbt.flow.a-right .in{text-align:right}
+.bvbt.flow.a-center .in{text-align:center}

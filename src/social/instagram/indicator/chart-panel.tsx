@@ -1,6 +1,7 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { ImagePlus, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { PASTE_HINT, PasteImageButton, usePasteImage } from "@/social/paste-image";
 import { Field, Panel, btn, inputCls } from "./editor-kit";
 import type { ChartFields } from "./shared";
 
@@ -19,7 +20,10 @@ export function ChartPanel<T extends WithChart>({ data, update, note, sampleLabe
       img.src = src;
     };
     r.readAsDataURL(file);
+    setMsg("");
   }
+  const [msg, setMsg] = useState("");
+  usePasteImage(onChart);
   return (
     <Panel title="Chart" note={note}>
       <div className="flex flex-wrap gap-2">
@@ -27,10 +31,12 @@ export function ChartPanel<T extends WithChart>({ data, update, note, sampleLabe
           <ImagePlus className="h-4 w-4" /> Upload chart
           <input type="file" accept="image/*" className="sr-only" onChange={(e) => (onChart(e.target.files?.[0]), (e.target.value = ""))} />
         </label>
+        <PasteImageButton onImage={onChart} onMsg={setMsg} className={btn} />
         <button type="button" onClick={() => update({ chart: null, chartSize: null })} disabled={!data.chart} className={cn(btn, "text-muted-foreground")}>
           <Trash2 className="h-4 w-4" /> {sampleLabel}
         </button>
       </div>
+      <p className="mt-2 text-xs text-muted-foreground">{msg || PASTE_HINT}</p>
       {children}
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
         <Field label="Caption (top-left of the chart)" hint="empty hides it">

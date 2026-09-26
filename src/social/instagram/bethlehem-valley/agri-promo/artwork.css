@@ -1,0 +1,80 @@
+/* "Agri Promotion" poster, scoped to .bva. Sizes follow agriculture_svg_master_template.md scaled to 1080 wide.
+   --H canvas height, --F top of the footer band, --top start of the right column, --ct / --cd circle top and size (artwork.tsx). */
+.bva.canvas{--forest900:#063F25;--forest800:#07552D;--forest700:#0B6B35;--leaf600:#319B22;--leaf500:#55B52A;--lime400:#B7E51A;
+  --yellow400:#FFD21A;--yellow500:#F4BE00;--cream:#F7F8E9;--ink:#123C2C;--muted:#587066;--line:#A9D79A;--s:1;
+  position:relative;width:1080px;height:var(--H,1350px);overflow:hidden;background:var(--cream);color:var(--ink);line-height:normal;text-align:left;
+  -webkit-font-smoothing:antialiased;font-family:"BV Poppins","BV Noto Sans Malayalam",Arial,sans-serif}
+.bva.story{--s:1.24}
+.bva .layer{position:absolute;left:0;top:0;width:1080px;height:var(--H,1350px)}
+
+/* hero photo */
+.bva .hero{position:absolute;left:0;top:0;width:560px;height:calc(var(--F) + 40px);overflow:hidden;background:var(--forest700)}
+.bva .hero img{width:100%;height:100%;object-fit:cover;display:block}
+.bva .hero-plain{width:100%;height:100%;background:linear-gradient(160deg,var(--leaf500),var(--forest900))}
+
+/* brand: logo + farm name; .pos-* puts the name right / left / below / above the logo */
+.bva .brand{position:absolute;right:44px;top:40px;display:flex;align-items:center;gap:14px}
+.bva.story .brand{top:64px}
+.bva .brand.pos-left{flex-direction:row-reverse}
+.bva .brand.pos-bottom{flex-direction:column;gap:10px}
+.bva .brand.pos-top{flex-direction:column-reverse;gap:10px}
+.bva .brand .mark{flex:none}
+.bva .brand img{display:block;object-fit:contain;max-width:420px}
+.bva .brand .plate{padding:8px 14px;border-radius:18px;background:var(--forest900);flex:none}
+
+/* right column (useAutoFit shrinks --k when it does not fit) */
+.bva .copy{position:absolute;left:414px;width:666px;padding:0 44px 0 86px;box-sizing:border-box;top:var(--top);height:calc(var(--F) - var(--top) - 24px);
+  display:flex;flex-direction:column;justify-content:space-between;gap:calc(12px * var(--k,1));overflow:hidden;--k:1}
+.bva .hl .bname{white-space:nowrap;overflow:hidden;font-weight:800;letter-spacing:-1.5px;line-height:1.0;color:var(--forest900);padding-right:4px}
+.bva .hl .l1{font-size:calc(68px * var(--s))}
+.bva .hl .l2{font-size:calc(74px * var(--s));color:var(--leaf600)}
+.bva .hl .l3{font-size:calc(64px * var(--s))}
+.bva .hleaf{display:inline-block;width:30px;height:52px;margin-left:10px;vertical-align:top;margin-top:4px;transform:rotate(28deg)}
+.bva .desc{padding-left:14px;font-size:calc(28px * var(--k) * var(--s));font-weight:400;line-height:1.3;color:var(--ink)}
+
+/* CTA */
+.bva .ctarow{display:flex;align-items:center;gap:10px;padding-left:18px}
+.bva .dash{width:34px;height:46px;flex:none}
+.bva .cta{display:flex;align-items:center;gap:26px;height:calc(90px * var(--k) * var(--s));padding:0 14px 0 44px;border-radius:999px;min-width:340px;justify-content:space-between;
+  background:linear-gradient(135deg,var(--yellow400),var(--yellow500));box-shadow:0 6px 14px rgba(6,63,37,.16)}
+.bva .cta .ct{font-size:calc(31px * var(--k) * var(--s));font-weight:700;color:var(--forest900);white-space:nowrap}
+.bva .cta .arrow{width:calc(60px * var(--k) * var(--s));height:calc(60px * var(--k) * var(--s));border-radius:50%;background:var(--forest700);display:grid;place-items:center;flex:none}
+.bva .cta .arrow svg{width:55%;height:55%}
+
+/* feature banner: reaches left over the photo and out to the right edge */
+.bva .banner{position:relative;flex:none;margin-left:-86px;margin-right:-44px;height:calc(152px * var(--k) * var(--s));display:flex;align-items:center;justify-content:center;padding:0 40px 0 60px}
+.bva .bshape{position:absolute;left:0;top:0;width:100%;height:100%}
+.bva .bleaf{position:absolute;top:44%;width:20px;height:36px}
+.bva .bleaf.l{left:44px;transform:rotate(-35deg)}
+.bva .bleaf.r{right:40px;transform:rotate(35deg)}
+.bva .btext{position:relative;text-align:center;color:#fff;min-width:0}
+.bva .be{font-size:calc(19px * var(--k) * var(--s));font-weight:600;letter-spacing:4px;line-height:1.1}
+.bva .btl{font-size:calc(50px * var(--k) * var(--s));font-weight:800;letter-spacing:.5px;line-height:1.08;white-space:nowrap}
+.bva .bs{display:flex;align-items:center;justify-content:center;gap:14px;font-size:calc(19px * var(--k) * var(--s));font-weight:600;letter-spacing:4px;line-height:1.1}
+.bva .bs i{display:block;width:70px;height:2px;background:var(--lime400);flex:none}
+
+/* benefits */
+.bva .benefits{display:flex;flex-direction:column;padding-left:18px}
+.bva .ben{position:relative;display:flex;align-items:center;gap:22px;padding:calc(12px * var(--k) * var(--s)) 0}
+.bva .ben + .ben::before{content:"";position:absolute;left:92px;right:10px;top:0;height:1px;background:var(--line)}
+.bva .bic{width:calc(68px * var(--k) * var(--s));height:calc(68px * var(--k) * var(--s));border-radius:50%;flex:none;display:grid;place-items:center;color:#fff;
+  background:linear-gradient(135deg,var(--leaf600),var(--forest700));box-shadow:0 4px 10px rgba(6,63,37,.18)}
+.bva .bic .ico{width:52%;height:52%}
+.bva .btx{min-width:0}
+.bva .bti{font-size:calc(24px * var(--k) * var(--s));font-weight:700;line-height:1.15;color:var(--forest900)}
+.bva .bde{margin-top:3px;font-size:calc(18px * var(--k) * var(--s));font-weight:400;line-height:1.3;color:var(--muted)}
+
+/* footer band */
+.bva .band{position:absolute;left:0;right:0;top:calc(var(--F) + 18px);bottom:26px;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));padding:0 36px;color:#fff}
+.bva .fi{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center}
+.bva .fi + .fi::before{content:"";position:absolute;left:0;top:50%;height:78px;margin-top:-39px;width:1px;background:rgba(255,255,255,.55)}
+.bva .fico{width:48px;height:48px}
+.bva.story .fico{width:56px;height:56px}
+.bva .fl{font-size:calc(17px * var(--s));font-weight:600;line-height:1.18}
+
+/* circular secondary photo: white ring, then the green accent ring */
+.bva .circle{position:absolute;left:34px;top:var(--ct);width:var(--cd);height:var(--cd);border-radius:50%;background:#fff;padding:10px;
+  box-shadow:0 0 0 7px var(--leaf500),0 10px 24px rgba(6,63,37,.22)}
+.bva .cimg{width:100%;height:100%;border-radius:50%;overflow:hidden}
+.bva .cimg img{width:100%;height:100%;object-fit:cover;display:block}
+.bva .cleaf{position:absolute;left:14px;bottom:30px;width:34px;height:60px;transform:rotate(-40deg)}

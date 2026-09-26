@@ -2,8 +2,10 @@ import {
   useEffect,
   useRef,
   useState,
+  type ForwardRefExoticComponent,
   type PointerEvent as ReactPointerEvent,
   type ReactNode,
+  type RefAttributes,
 } from "react";
 import { usePlannedDraft } from "@/social/saved-posts";
 import {
@@ -20,6 +22,7 @@ import {
 } from "lucide-react";
 import { downloadSvgAsPng, svgToPngBlob } from "@/social/export";
 import { VideoDownload } from "@/social/video-ui";
+import { PASTE_HINT, PasteImageButton, usePasteImage } from "@/social/paste-image";
 import { igH } from "@/social/instagram/layout";
 import { LayoutPanel } from "@/social/instagram/layout-ui";
 import {
@@ -44,31 +47,100 @@ import {
   levelProblems,
   mergeData,
   suggestedRR,
+  type SwingBase,
   type SwingTradeData,
 } from "./data";
 
 const STORE_KEY = "social:Instagram_SwingTrade";
 
 export function SwingTradeEditor() {
+  return (
+    <SwingEditorShell<SwingTradeData>
+      storeKey={STORE_KEY}
+      defaults={defaultData}
+      merge={(raw) => mergeData(raw as Partial<Record<keyof SwingTradeData, unknown>> | null)}
+      example={{ label: "Load example (RELIANCE)", data: exampleData }}
+      Artwork={SwingTradeArtwork}
+      filePrefix="swing"
+      jsonTemplate="swing-trade"
+      chart={{
+        note: "Without an image, an illustrative candlestick chart is drawn from your levels. Use your real chart before posting a real trade.",
+        illustrative: true,
+      }}
+    >
+      {(data, set, setData) => <TradePanel data={data} set={set} setData={setData} />}
+    </SwingEditorShell>
+  );
+}
+
+export type Setter<T> = <K extends keyof T>(k: K, v: T[K]) => void;
+export type DataSetter<T> = (fn: (d: T) => T) => void;
+
+/** BUY / SELL buttons (shared by the Swing Trade style templates). */
+export function DirectionToggle({ value, onChange }: { value: SwingBase["direction"]; onChange: (v: SwingBase["direction"]) => void }) {
+  return (
+    <div className="mb-4 grid grid-cols-2 gap-2">
+      {(["BUY", "SELL"] as const).map((dir) => (
+        <button
+          key={dir}
+          type="button"
+          onClick={() => onChange(dir)}
+          aria-pressed={value === dir}
+          className={cn(
+            "rounded-xl border-2 py-2.5 font-display font-bold tracking-wide transition-colors",
+            value === dir
+              ? dir === "BUY"
+                ? "border-[#0AA66A] bg-[#0AA66A] text-white"
+                : "border-[#EF3340] bg-[#EF3340] text-white"
+              : dir === "BUY"
+                ? "border-[#0AA66A]/40 text-[#0AA66A]"
+                : "border-[#EF3340]/40 text-[#EF3340]",
+          )}
+        >
+          {dir === "BUY" ? "↑ BUY" : "↓ SELL"}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+type ShellProps<T extends SwingBase> = {
+  /** localStorage key of the draft */
+  storeKey: string;
+  defaults: () => T;
+  merge: (raw: unknown) => T;
+  example: { label: string; data: () => T };
+  Artwork: ForwardRefExoticComponent<{ data: T; className?: string } & RefAttributes<SVGSVGElement>>;
+  /** start of downloaded file names, e.g. "swing" */
+  filePrefix: string;
+  /** "template" written into Download data (.json) */
+  jsonTemplate: string;
+  /** Chart panel note; `illustrative` = a chart is drawn when no image is set */
+  chart: { note: string; illustrative: boolean };
+  /** the template's own panels */
+  children: (data: T, set: Setter<T>, setData: DataSetter<T>) => ReactNode;
+  /** extra fields at the end of the Text panel */
+  extraText?: (data: T, set: Setter<T>) => ReactNode;
+};
+
+/** Editor for a post in the Swing Trade style: everything but the template's own fields. */
+export function SwingEditorShell<T extends SwingBase>({ storeKey, defaults, merge, example, Artwork, filePrefix, jsonTemplate, chart, children, extraText }: ShellProps<T>) {
   // the usual draft, or a planned post's own draft when opened from the content planner
-  const { data, setData } = usePlannedDraft<SwingTradeData>(STORE_KEY, defaultData, (raw) => mergeData(raw as Partial<Record<keyof SwingTradeData, unknown>> | null));
+  const { data, setData } = usePlannedDraft<T>(storeKey, defaults, merge);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState("");
   const svgRef = useRef<SVGSVGElement>(null);
 
-
-  const set = <K extends keyof SwingTradeData>(k: K, v: SwingTradeData[K]) =>
-    setData((d) => ({ ...d, [k]: v }));
-  const problems = levelProblems(data);
+  const set: Setter<T> = (k, v) => setData((d) => ({ ...d, [k]: v }));
   const H = igH(data.layout);
-  const rr = suggestedRR(data);
+  const fileBase = `${filePrefix}_${(data.ticker || "trade").toLowerCase().replace(/[^a-z0-9]+/g, "-")}_${data.date || "undated"}`;
 
   async function download() {
     if (!svgRef.current) return;
     setBusy(true);
     setMsg("");
     try {
-      const name = `swing_${(data.ticker || "trade").toLowerCase().replace(/[^a-z0-9]+/g, "-")}_${data.date || "undated"}.png`;
+      const name = `${fileBase}.png`;
       await downloadSvgAsPng(svgRef.current, IG_W, H, name);
     } catch (e) {
       setMsg(e instanceof Error ? e.message : "Export failed");
@@ -96,6 +168,7 @@ export function SwingTradeEditor() {
       `Using your chart image (${file.name}). Drag it in the preview or use the controls below to position it.`,
     );
   }
+  usePasteImage((file) => void onChart(file));
 
   // a chart saved before sizes were stored: measure it once
   useEffect(() => {
@@ -174,7 +247,7 @@ export function SwingTradeEditor() {
         !("direction" in raw)
       )
         throw new Error("the file needs at least stockName and direction");
-      setData(mergeData(raw));
+      setData(merge(raw));
       setMsg(`Loaded ${file.name}.`);
     } catch (e) {
       setMsg(
@@ -187,20 +260,14 @@ export function SwingTradeEditor() {
     const a = document.createElement("a");
     a.href = URL.createObjectURL(
       new Blob(
-        [JSON.stringify({ template: "swing-trade", ...data }, null, 2)],
+        [JSON.stringify({ template: jsonTemplate, ...data }, null, 2)],
         { type: "application/json" },
       ),
     );
-    a.download = `swing_${(data.ticker || "trade").toLowerCase()}.json`;
+    a.download = `${filePrefix}_${(data.ticker || "trade").toLowerCase()}.json`;
     a.click();
     setTimeout(() => URL.revokeObjectURL(a.href), 2000);
   }
-
-  const setReason = (i: number, v: string) =>
-    setData((d) => ({
-      ...d,
-      reason: d.reason.map((r, j) => (j === i ? v : r)),
-    }));
 
   return (
     <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_minmax(0,540px)]">
@@ -208,10 +275,10 @@ export function SwingTradeEditor() {
         <div className="flex flex-wrap gap-2">
           <button
             type="button"
-            onClick={() => setData(exampleData())}
+            onClick={() => setData(example.data())}
             className={btn}
           >
-            <Sparkles className="h-4 w-4" /> Load example (RELIANCE)
+            <Sparkles className="h-4 w-4" /> {example.label}
           </button>
           <label className={cn(btn, "cursor-pointer")}>
             <Upload className="h-4 w-4" /> Load data (.json)
@@ -231,7 +298,7 @@ export function SwingTradeEditor() {
           <button
             type="button"
             onClick={() =>
-              confirm("Clear all fields?") && setData(defaultData())
+              confirm("Clear all fields?") && setData(defaults())
             }
             className={cn(btn, "text-muted-foreground")}
           >
@@ -291,184 +358,11 @@ export function SwingTradeEditor() {
           </div>
         </Panel>
 
-        <Panel title="Trade">
-          <div className="mb-4 grid grid-cols-2 gap-2">
-            {(["BUY", "SELL"] as const).map((dir) => (
-              <button
-                key={dir}
-                type="button"
-                onClick={() => set("direction", dir)}
-                aria-pressed={data.direction === dir}
-                className={cn(
-                  "rounded-xl border-2 py-2.5 font-display font-bold tracking-wide transition-colors",
-                  data.direction === dir
-                    ? dir === "BUY"
-                      ? "border-[#0AA66A] bg-[#0AA66A] text-white"
-                      : "border-[#EF3340] bg-[#EF3340] text-white"
-                    : dir === "BUY"
-                      ? "border-[#0AA66A]/40 text-[#0AA66A]"
-                      : "border-[#EF3340]/40 text-[#EF3340]",
-                )}
-              >
-                {dir === "BUY" ? "↑ BUY" : "↓ SELL"}
-              </button>
-            ))}
-          </div>
-          <div className="grid gap-4 sm:grid-cols-4">
-            <Field label="Entry (₹)">
-              <input
-                value={data.entryPrice}
-                onChange={(e) => set("entryPrice", e.target.value)}
-                className={inputCls}
-                inputMode="decimal"
-              />
-            </Field>
-            <Field label="Target 1 (₹)">
-              <input
-                value={data.target1}
-                onChange={(e) => set("target1", e.target.value)}
-                className={inputCls}
-                inputMode="decimal"
-              />
-            </Field>
-            <Field label="Target 2 (₹)">
-              <input
-                value={data.target2}
-                onChange={(e) => set("target2", e.target.value)}
-                className={inputCls}
-                inputMode="decimal"
-              />
-            </Field>
-            <Field label="Stop loss (₹)">
-              <input
-                value={data.stopLoss}
-                onChange={(e) => set("stopLoss", e.target.value)}
-                className={inputCls}
-                inputMode="decimal"
-              />
-            </Field>
-          </div>
-          {problems.length > 0 && (
-            <div className="mt-3 space-y-1 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900">
-              {problems.map((p) => (
-                <p key={p} className="flex gap-2">
-                  <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0" /> {p}
-                </p>
-              ))}
-            </div>
-          )}
-          <div className="mt-4 grid gap-4 sm:grid-cols-3">
-            <Field label="Time frame">
-              <input
-                value={data.timeframe}
-                onChange={(e) => set("timeframe", e.target.value)}
-                className={inputCls}
-                list="st-tf"
-              />
-              <datalist id="st-tf">
-                {["Daily", "Weekly", "Monthly", "4H", "Hourly"].map((o) => (
-                  <option key={o} value={o} />
-                ))}
-              </datalist>
-            </Field>
-            <Field label="Trade setup">
-              <input
-                value={data.setup}
-                onChange={(e) => set("setup", e.target.value)}
-                className={inputCls}
-                list="st-setup"
-                placeholder="e.g. Breakout"
-              />
-              <datalist id="st-setup">
-                {[
-                  "Breakout",
-                  "Breakdown",
-                  "Pullback",
-                  "Reversal",
-                  "Trend continuation",
-                ].map((o) => (
-                  <option key={o} value={o} />
-                ))}
-              </datalist>
-            </Field>
-            <Field label="Risk / reward">
-              <input
-                value={data.riskReward}
-                onChange={(e) => set("riskReward", e.target.value)}
-                className={inputCls}
-                placeholder="e.g. 1 : 2.5"
-              />
-            </Field>
-          </div>
-          {rr && (rr.t1 !== null || rr.t2 !== null) && (
-            <p className="mt-2 text-xs text-muted-foreground">
-              From your levels: {rr.t1 !== null && <>1 : {rr.t1} to Target 1</>}
-              {rr.t1 !== null && rr.t2 !== null && " · "}
-              {rr.t2 !== null && (
-                <>
-                  1 : {rr.t2} to Target 2{" "}
-                  <button
-                    type="button"
-                    className="font-semibold text-accent hover:underline"
-                    onClick={() => set("riskReward", `1 : ${rr.t2}`)}
-                  >
-                    use this
-                  </button>
-                </>
-              )}
-            </p>
-          )}
-          <div className="mt-4">
-            <span className="mb-1 block text-xs font-medium text-muted-foreground">
-              Key reasons (1–3 short points)
-            </span>
-            <div className="space-y-2">
-              {data.reason.map((r, i) => (
-                <div key={i} className="flex gap-2">
-                  <input
-                    value={r}
-                    onChange={(e) => setReason(i, e.target.value)}
-                    className={inputCls}
-                    placeholder="e.g. Breakout above resistance with strong volume"
-                  />
-                  {data.reason.length > 1 && (
-                    <button
-                      type="button"
-                      aria-label="Remove reason"
-                      onClick={() =>
-                        setData((d) => ({
-                          ...d,
-                          reason: d.reason.filter((_, j) => j !== i),
-                        }))
-                      }
-                      className="rounded-lg border border-border px-2 text-muted-foreground hover:bg-secondary"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  )}
-                </div>
-              ))}
-              {data.reason.length < 3 && (
-                <button
-                  type="button"
-                  onClick={() =>
-                    setData((d) => ({ ...d, reason: [...d.reason, ""] }))
-                  }
-                  className="text-sm font-medium text-accent hover:underline"
-                >
-                  + Add a reason
-                </button>
-              )}
-            </div>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Up to 4 lines fit in the Key Reason box; keep each point short.
-            </p>
-          </div>
-        </Panel>
+        {children(data, set, setData)}
 
         <Panel
           title="Chart"
-          note="Without an image, an illustrative candlestick chart is drawn from your levels. Use your real chart before posting a real trade."
+          note={chart.note}
         >
           <div className="flex flex-wrap items-center gap-2">
             <label className={cn(btn, "cursor-pointer")}>
@@ -484,6 +378,7 @@ export function SwingTradeEditor() {
                 )}
               />
             </label>
+            <PasteImageButton onImage={(file) => void onChart(file)} onMsg={setMsg} className={btn} />
             {data.chart && (
               <button
                 type="button"
@@ -493,7 +388,7 @@ export function SwingTradeEditor() {
                 <Trash2 className="h-4 w-4" /> Remove image
               </button>
             )}
-            {!data.chart && (
+            {!data.chart && chart.illustrative && (
               <label className="ml-1 flex items-center gap-2 text-sm">
                 <input
                   type="checkbox"
@@ -504,6 +399,7 @@ export function SwingTradeEditor() {
               </label>
             )}
           </div>
+          <p className="mt-2 text-xs text-muted-foreground">{PASTE_HINT}</p>
           {data.chart && (
             <div className="mt-4 space-y-3 rounded-xl border border-border p-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
@@ -584,7 +480,7 @@ export function SwingTradeEditor() {
               </p>
             </div>
           )}
-          {!data.chart && (
+          {!data.chart && chart.illustrative && (
             <p className="mt-2 flex gap-2 text-xs text-amber-800">
               <TriangleAlert className="h-4 w-4 shrink-0" /> The drawn chart is
               not real price data.
@@ -792,6 +688,7 @@ export function SwingTradeEditor() {
                 className={inputCls}
               />
             </Field>
+            {extraText?.(data, set)}
           </div>
         </Panel>
       </div>
@@ -815,7 +712,7 @@ export function SwingTradeEditor() {
             )}
           >
             <div data-plan-preview className={cn(data.layout.format === "story" && "mx-auto max-w-[400px]")}>
-              <SwingTradeArtwork
+              <Artwork
                 ref={svgRef}
                 data={data}
                 className="block h-auto w-full rounded-lg shadow-lg"
@@ -840,7 +737,7 @@ export function SwingTradeEditor() {
               if (!svgRef.current) throw new Error("preview not ready");
               return svgToPngBlob(svgRef.current, IG_W, H);
             }}
-            fileBase={`swing_${(data.ticker || "trade").toLowerCase().replace(/[^a-z0-9]+/g, "-")}_${data.date || "undated"}`}
+            fileBase={fileBase}
             w={IG_W}
             h={H}
             onMsg={setMsg}
@@ -858,10 +755,10 @@ export function SwingTradeEditor() {
 
 const btn =
   "inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium hover:bg-secondary";
-const inputCls =
+export const inputCls =
   "w-full rounded-lg border border-input bg-card px-3 py-2 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/30";
 
-function Panel({
+export function Panel({
   title,
   note,
   children,
@@ -879,7 +776,7 @@ function Panel({
   );
 }
 
-function Field({
+export function Field({
   label,
   wide,
   children,
@@ -978,5 +875,171 @@ function Slider({
         <span className="text-xs text-muted-foreground">{unit}</span>
       </span>
     </div>
+  );
+}
+
+/** Swing Trade's own fields: direction, entry, targets, stop loss, setup, reasons, risk / reward. */
+function TradePanel({ data, set, setData }: { data: SwingTradeData; set: Setter<SwingTradeData>; setData: DataSetter<SwingTradeData> }) {
+  const problems = levelProblems(data);
+  const rr = suggestedRR(data);
+  const setReason = (i: number, v: string) =>
+    setData((d) => ({
+      ...d,
+      reason: d.reason.map((r, j) => (j === i ? v : r)),
+    }));
+  return (
+    <Panel title="Trade">
+      <DirectionToggle value={data.direction} onChange={(v) => set("direction", v)} />
+      <div className="grid gap-4 sm:grid-cols-4">
+        <Field label="Entry (₹)">
+          <input
+            value={data.entryPrice}
+            onChange={(e) => set("entryPrice", e.target.value)}
+            className={inputCls}
+            inputMode="decimal"
+          />
+        </Field>
+        <Field label="Target 1 (₹)">
+          <input
+            value={data.target1}
+            onChange={(e) => set("target1", e.target.value)}
+            className={inputCls}
+            inputMode="decimal"
+          />
+        </Field>
+        <Field label="Target 2 (₹)">
+          <input
+            value={data.target2}
+            onChange={(e) => set("target2", e.target.value)}
+            className={inputCls}
+            inputMode="decimal"
+          />
+        </Field>
+        <Field label="Stop loss (₹)">
+          <input
+            value={data.stopLoss}
+            onChange={(e) => set("stopLoss", e.target.value)}
+            className={inputCls}
+            inputMode="decimal"
+          />
+        </Field>
+      </div>
+      {problems.length > 0 && (
+        <div className="mt-3 space-y-1 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+          {problems.map((p) => (
+            <p key={p} className="flex gap-2">
+              <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0" /> {p}
+            </p>
+          ))}
+        </div>
+      )}
+      <div className="mt-4 grid gap-4 sm:grid-cols-3">
+        <Field label="Time frame">
+          <input
+            value={data.timeframe}
+            onChange={(e) => set("timeframe", e.target.value)}
+            className={inputCls}
+            list="st-tf"
+          />
+          <datalist id="st-tf">
+            {["Daily", "Weekly", "Monthly", "4H", "Hourly"].map((o) => (
+              <option key={o} value={o} />
+            ))}
+          </datalist>
+        </Field>
+        <Field label="Trade setup">
+          <input
+            value={data.setup}
+            onChange={(e) => set("setup", e.target.value)}
+            className={inputCls}
+            list="st-setup"
+            placeholder="e.g. Breakout"
+          />
+          <datalist id="st-setup">
+            {[
+              "Breakout",
+              "Breakdown",
+              "Pullback",
+              "Reversal",
+              "Trend continuation",
+            ].map((o) => (
+              <option key={o} value={o} />
+            ))}
+          </datalist>
+        </Field>
+        <Field label="Risk / reward">
+          <input
+            value={data.riskReward}
+            onChange={(e) => set("riskReward", e.target.value)}
+            className={inputCls}
+            placeholder="e.g. 1 : 2.5"
+          />
+        </Field>
+      </div>
+      {rr && (rr.t1 !== null || rr.t2 !== null) && (
+        <p className="mt-2 text-xs text-muted-foreground">
+          From your levels: {rr.t1 !== null && <>1 : {rr.t1} to Target 1</>}
+          {rr.t1 !== null && rr.t2 !== null && " · "}
+          {rr.t2 !== null && (
+            <>
+              1 : {rr.t2} to Target 2{" "}
+              <button
+                type="button"
+                className="font-semibold text-accent hover:underline"
+                onClick={() => set("riskReward", `1 : ${rr.t2}`)}
+              >
+                use this
+              </button>
+            </>
+          )}
+        </p>
+      )}
+      <div className="mt-4">
+        <span className="mb-1 block text-xs font-medium text-muted-foreground">
+          Key reasons (1–3 short points)
+        </span>
+        <div className="space-y-2">
+          {data.reason.map((r, i) => (
+            <div key={i} className="flex gap-2">
+              <input
+                value={r}
+                onChange={(e) => setReason(i, e.target.value)}
+                className={inputCls}
+                placeholder="e.g. Breakout above resistance with strong volume"
+              />
+              {data.reason.length > 1 && (
+                <button
+                  type="button"
+                  aria-label="Remove reason"
+                  onClick={() =>
+                    setData((d) => ({
+                      ...d,
+                      reason: d.reason.filter((_, j) => j !== i),
+                    }))
+                  }
+                  className="rounded-lg border border-border px-2 text-muted-foreground hover:bg-secondary"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+          ))}
+          {data.reason.length < 3 && (
+            <button
+              type="button"
+              onClick={() =>
+                setData((d) => ({ ...d, reason: [...d.reason, ""] }))
+              }
+              className="text-sm font-medium text-accent hover:underline"
+            >
+              + Add a reason
+            </button>
+          )}
+        </div>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Up to 4 lines fit in the Key Reason box; keep each point short.
+        </p>
+      </div>
+    </Panel>
   );
 }

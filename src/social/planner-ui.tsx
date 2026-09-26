@@ -6,10 +6,12 @@ import {
   CalendarDays,
   CalendarPlus,
   Check,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
   Clock,
   FileCheck2,
+  Lightbulb,
   List,
   MoveRight,
   Pause,
@@ -25,6 +27,7 @@ import {
 import { cn } from "@/lib/utils";
 import type { SavedPostMeta } from "@/social/backend";
 import { deleteSavedPost, useSavedPosts } from "@/social/saved-posts";
+import { Notes, PriorityBadge } from "@/social/ideas-ui";
 import { BRANDS, type BrandId } from "@/branding/brands";
 import type { SocialPlatform } from "@/social/registry";
 import { DAY_LONG, DAY_SHORT, WEEK, formatDays, type Weekday } from "@/social/schedule";
@@ -45,6 +48,7 @@ import {
   type PlanTemplate,
   type Planner,
   type RecurringSlot,
+  type TopicIdea,
 } from "@/social/planner";
 
 /*
@@ -139,6 +143,9 @@ export function PlannerScreen({ platform: pf }: { platform: SocialPlatform }) {
             <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-white/80">{pf.name}</p>
             <h1 className="font-display text-3xl font-bold tracking-tight md:text-4xl">Content planner</h1>
           </div>
+          <Link to="/social/$platform/ideas" params={{ platform: pf.id }} className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-4 py-2 text-sm font-semibold ring-1 ring-white/30 hover:bg-white/25">
+            <Lightbulb className="h-4 w-4" /> Topic ideas
+          </Link>
           <Link to="/social/$platform" params={{ platform: pf.id }} className="rounded-full bg-white/15 px-4 py-2 text-sm font-semibold ring-1 ring-white/30 hover:bg-white/25">
             ← Templates
           </Link>
@@ -199,7 +206,7 @@ export function PlannerScreen({ platform: pf }: { platform: SocialPlatform }) {
           {view === "list" && <ListView start={cursor} today={today} onSelect={setSelected} on={on} tpl={tpl} saved={saved} />}
         </div>
         <div className="xl:sticky xl:top-6 xl:self-start">
-          <DayPanel date={selected} today={today} occ={on(selected)} tpl={tpl} templates={templates} platform={pf.id} saved={saved} />
+          <DayPanel date={selected} today={today} occ={on(selected)} tpl={tpl} templates={templates} platform={pf.id} saved={saved} ideas={planner.ideas} />
         </div>
       </div>
 
@@ -253,6 +260,8 @@ function Chip({ o, tpl, big, ready }: { o: Occurrence; tpl: Tpl; big?: boolean; 
         <Check className="h-3 w-3 shrink-0 text-emerald-600" />
       ) : ready ? (
         <FileCheck2 className="h-3 w-3 shrink-0 text-violet-600" aria-label="post saved, ready" />
+      ) : o.ideaId ? (
+        <Lightbulb className="h-3 w-3 shrink-0 text-amber-600" aria-label="from a topic idea" />
       ) : o.kind === "once" ? (
         <CalendarPlus className="h-3 w-3 shrink-0 opacity-60" />
       ) : null}
@@ -329,6 +338,7 @@ function WeekView({ start, today, selected, onSelect, on, tpl, saved }: { start:
                 <span key={o.key} className={cn("min-w-0 rounded-xl border-l-4 bg-secondary/50 p-2", o.posted && "opacity-55")} style={{ borderColor: b?.ui.from }}>
                   <span className="flex items-center gap-1 whitespace-nowrap text-[11px] font-bold tabular-nums">
                     <Clock className="h-3 w-3" /> {fmtTime(o.time)}
+                    {o.ideaId && <Lightbulb className="h-3 w-3 text-amber-600" aria-label="from a topic idea" />}
                     {o.posted ? <Check className="ml-auto h-3.5 w-3.5 text-emerald-600" /> : saved.has(o.key) ? <FileCheck2 className="ml-auto h-3.5 w-3.5 text-violet-600" /> : null}
                   </span>
                   <span className={cn("mt-0.5 block text-[13px] font-semibold leading-tight [overflow-wrap:anywhere]", o.posted && "line-through")}>{t?.title}</span>
@@ -369,10 +379,33 @@ function ListView({ start, today, onSelect, on, tpl, saved }: { start: string; t
 
 /* ---------- day panel ---------- */
 
-function DayPanel({ date, today, occ, tpl, templates, platform, saved }: { date: string; today: string; occ: Occurrence[]; tpl: Tpl; templates: PlanTemplate[]; platform: string; saved: Saved }) {
+function DayPanel({
+  date,
+  today,
+  occ,
+  tpl,
+  templates,
+  platform,
+  saved,
+  ideas,
+}: {
+  date: string;
+  today: string;
+  occ: Occurrence[];
+  tpl: Tpl;
+  templates: PlanTemplate[];
+  platform: string;
+  saved: Saved;
+  ideas: TopicIdea[];
+}) {
   const [moving, setMoving] = useState<string | null>(null);
   const [mv, setMv] = useState({ date: "", time: "" });
-  const [add, setAdd] = useState({ templateId: "", time: "", note: "" });
+  const [add, setAdd] = useState({ templateId: "", time: "", note: "", ideaId: "" });
+  const [showTopic, setShowTopic] = useState<string | null>(null);
+  const fits = (i: TopicIdea, templateId: string) => !templateId || (i.templates.length ? i.templates.includes(templateId) : !i.brand || i.brand === tpl(templateId)?.brand);
+  const openIdeas = ideas
+    .filter((i) => i.status !== "done" && fits(i, add.templateId))
+    .sort((a, b) => (a.status === "final" ? 0 : 1) - (b.status === "final" ? 0 : 1) || a.priority - b.priority);
   const live = occ.filter((o) => !o.skipped);
   const skipped = occ.filter((o) => o.skipped);
   const rel = date === today ? "Today" : date === addDays(today, 1) ? "Tomorrow" : date < today ? "Past" : "";
@@ -402,6 +435,7 @@ function DayPanel({ date, today, occ, tpl, templates, platform, saved }: { date:
           const t = tpl(o.templateId);
           const b = brandOf(t?.brand ?? "");
           const post = saved.get(o.key);
+          const idea = o.ideaId ? ideas.find((i) => i.id === o.ideaId) : undefined;
           return (
             <div key={o.key} className={cn("rounded-xl border p-3", o.posted ? "border-emerald-300 bg-emerald-50/60" : post ? "border-violet-300 bg-violet-50/50" : "border-border")}>
               <div className="flex items-start gap-3">
@@ -431,6 +465,17 @@ function DayPanel({ date, today, occ, tpl, templates, platform, saved }: { date:
                     {o.moved && o.from === o.date && <span className="rounded-full bg-amber-100 px-2 py-0.5 font-medium text-amber-900">Time changed</span>}
                   </p>
                   {o.note && <p className="mt-1 text-sm text-muted-foreground">{o.note}</p>}
+                  {idea && (
+                    <button
+                      type="button"
+                      onClick={() => setShowTopic(showTopic === o.key ? null : o.key)}
+                      aria-expanded={showTopic === o.key}
+                      className="mt-1 flex w-fit items-center gap-1 text-xs font-semibold text-amber-700 hover:underline"
+                    >
+                      <Lightbulb className="h-3.5 w-3.5" /> {showTopic === o.key ? "Hide topic" : "See topic"} (P{idea.priority})
+                      <ChevronDown className={cn("h-3.5 w-3.5 transition-transform", showTopic === o.key && "rotate-180")} />
+                    </button>
+                  )}
                   <p className={cn("mt-1.5 inline-flex items-center gap-1 text-xs font-semibold", post ? "text-violet-700" : "text-muted-foreground")}>
                     {post ? <FileCheck2 className="h-3.5 w-3.5" /> : <CalendarPlus className="h-3.5 w-3.5" />}
                     {post ? "Post ready · saved " + new Date(post.savedAt).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "Post not created yet"}
@@ -442,6 +487,25 @@ function DayPanel({ date, today, occ, tpl, templates, platform, saved }: { date:
                   </Link>
                 )}
               </div>
+
+              {idea && showTopic === o.key && (
+                <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50/60 p-3">
+                  <p className="flex items-start gap-2">
+                    <PriorityBadge p={idea.priority} className="mt-0.5" />
+                    <span className="min-w-0 flex-1 font-semibold leading-snug">{idea.title}</span>
+                  </p>
+                  {idea.notes ? (
+                    <div className="mt-2">
+                      <Notes text={idea.notes} />
+                    </div>
+                  ) : (
+                    <p className="mt-2 text-xs text-muted-foreground">No notes on this topic.</p>
+                  )}
+                  <Link to="/social/$platform/ideas" params={{ platform }} search={{ idea: idea.id }} className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-accent hover:underline">
+                    Open in Topic ideas <ArrowRight className="h-3.5 w-3.5" />
+                  </Link>
+                </div>
+              )}
 
               {moving === o.key ? (
                 <div className="mt-3 flex flex-wrap items-end gap-2 rounded-lg bg-secondary/60 p-2">
@@ -533,13 +597,33 @@ function DayPanel({ date, today, occ, tpl, templates, platform, saved }: { date:
           <TemplateSelect value={add.templateId} onChange={(v) => setAdd({ ...add, templateId: v })} templates={templates} />
           <input type="time" value={add.time} onChange={(e) => setAdd({ ...add, time: e.target.value })} aria-label="Time" className={inputCls} />
         </div>
+        {openIdeas.length > 0 && (
+          <select
+            value={add.ideaId}
+            onChange={(e) => setAdd({ ...add, ideaId: e.target.value, note: ideas.find((i) => i.id === e.target.value)?.title ?? add.note })}
+            aria-label="From a topic idea"
+            className={cn(inputCls, "mt-2")}
+          >
+            <option value="">From a topic idea (optional)…</option>
+            {openIdeas.map((i) => (
+              <option key={i.id} value={i.id}>
+                P{i.priority} · {i.title}
+                {i.status === "final" ? " ★" : ""}
+              </option>
+            ))}
+          </select>
+        )}
         <input value={add.note} onChange={(e) => setAdd({ ...add, note: e.target.value })} placeholder="Note, e.g. topic: ginger pests" aria-label="Note" className={cn(inputCls, "mt-2")} />
         <button
           type="button"
           disabled={!add.templateId}
           onClick={() => {
-            updatePlanner((p) => ({ ...p, oneOffs: [...p.oneOffs, { id: planId(), templateId: add.templateId, date, time: add.time, note: add.note.trim() }] }));
-            setAdd({ templateId: add.templateId, time: "", note: "" });
+            updatePlanner((p) => ({
+              ...p,
+              oneOffs: [...p.oneOffs, { id: planId(), templateId: add.templateId, date, time: add.time, note: add.note.trim(), ...(add.ideaId ? { ideaId: add.ideaId } : {}) }],
+              ideas: p.ideas.map((i) => (i.id === add.ideaId && i.status === "idea" ? { ...i, status: "final" } : i)),
+            }));
+            setAdd({ templateId: add.templateId, time: "", note: "", ideaId: "" });
           }}
           className={cn(smallBtn, "mt-2 w-full justify-center bg-foreground py-2 text-background hover:bg-foreground/90 disabled:opacity-40")}
         >
